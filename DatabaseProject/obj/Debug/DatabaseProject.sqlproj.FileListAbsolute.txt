@@ -1,0 +1,10 @@
+C:\Professional software dev\DatabaseProject\bin\Debug\DatabaseProject.dacpac
+C:\Professional software dev\DatabaseProject\bin\Debug\DatabaseProject.dll
+C:\Professional software dev\DatabaseProject\bin\Debug\DatabaseProject.pdb
+C:\Professional software dev\DatabaseProject\obj\Debug\DatabaseProject.sqlproj.AssemblyReference.cache
+C:\Professional software dev\DatabaseProject\obj\Debug\Model.xml
+C:\Professional software dev\DatabaseProject\obj\Debug\refactor.xml
+C:\Professional software dev\DatabaseProject\obj\Debug\postdeploy.sql
+C:\Professional software dev\DatabaseProject\obj\Debug\predeploy.sql
+C:\Professional software dev\DatabaseProject\obj\Debug\DatabaseProject.dll
+C:\Professional software dev\DatabaseProject\obj\Debug\DatabaseProject.pdb
