@@ -1,0 +1,1094 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Professional software dev\\StudyGroup\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\courserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\sqlqueries\\coursesql.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\studygroupscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\studygroupscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\tagscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\tagscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Professional software dev\\DatabaseProject\\dbo\\Scripts\\InsertMembershipStatuses.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\dayofweek.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\entitytypeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\studygroupdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\idayofweekservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\idayofweekrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\igroupmemberservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\courseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\istudygrouprepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\studygroup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\membershipstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\groupmember.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\entitytype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\sqlqueries\\studygroupsql.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\studygrouprepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\istudygroupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\studygroupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\tag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\icourseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\sqlqueries\\groupmembersql.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\igroupmemberrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\groupmemberrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\groupmemberservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\itagrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\tagrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\itagservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\tagservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\imembershipstatusrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\membershipstatusrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\imembershipstatusservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\membershipstatusservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\ientitytyperepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\entitytyperepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\ientitytypeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\entitytypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\entitytypescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\dayofweekrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\dayofweekservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\coursedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\groupmemberdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\tagdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\membershipstatusdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\dayofweekdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\groupmemberscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\groupmemberscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\settings\\jwtsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\interfaces\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\services\\dataseedingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:services\\dataseedingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\services\\autotaggingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:services\\autotaggingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Professional software dev\\DatabaseProject\\dbo\\Scripts\\InsertMembershipStatuses.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\authorization\\studygroupcreatoronlyattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:authorization\\studygroupcreatoronlyattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 66,
+              "Title": "StudyGroupCreatorOnlyAttribute.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Authorization\\StudyGroupCreatorOnlyAttribute.cs",
+              "RelativeDocumentMoniker": "Authorization\\StudyGroupCreatorOnlyAttribute.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Authorization\\StudyGroupCreatorOnlyAttribute.cs",
+              "RelativeToolTip": "Authorization\\StudyGroupCreatorOnlyAttribute.cs",
+              "ViewState": "AgIAAE8AAAAAAAAAAEBVwFMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T02:54:06.816Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CourseSql.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:01:01.25Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CourseRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAUwDwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:01:08.893Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "StudyGroupsController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\StudyGroupsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\StudyGroupsController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\StudyGroupsController.cs",
+              "RelativeToolTip": "Controllers\\StudyGroupsController.cs",
+              "ViewState": "AgIAANQBAAAAAAAAAAAEwOUBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:51:12.676Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "TagsController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\TagsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\TagsController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\TagsController.cs",
+              "RelativeToolTip": "Controllers\\TagsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFQBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:05:04.66Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:00:10.619Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "EntityTypeService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\EntityTypeService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\EntityTypeService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\EntityTypeService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\EntityTypeService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:06:50.318Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 63,
+              "Title": "DataSeedingService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Services\\DataSeedingService.cs",
+              "RelativeDocumentMoniker": "Services\\DataSeedingService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Services\\DataSeedingService.cs",
+              "RelativeToolTip": "Services\\DataSeedingService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T19:26:15.427Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "InsertMembershipStatuses.sql ",
+              "DocumentMoniker": "C:\\Professional software dev\\DatabaseProject\\dbo\\Scripts\\InsertMembershipStatuses.sql",
+              "RelativeDocumentMoniker": "..\\DatabaseProject\\dbo\\Scripts\\InsertMembershipStatuses.sql",
+              "ToolTip": "InsertMembershipStatuses.sql ",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-10-11T20:57:25.405Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 64,
+              "Title": "AutoTaggingService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Services\\AutoTaggingService.cs",
+              "RelativeDocumentMoniker": "Services\\AutoTaggingService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Services\\AutoTaggingService.cs",
+              "RelativeToolTip": "Services\\AutoTaggingService.cs",
+              "ViewState": "AgIAAHIBAAAAAAAAAEBVwHYBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T19:30:51.243Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "JwtSettings.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Settings\\JwtSettings.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Settings\\JwtSettings.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Settings\\JwtSettings.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Settings\\JwtSettings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:52:42.624Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
+              "Title": "IAuthService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IAuthService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IAuthService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IAuthService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IAuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:52:52.211Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 61,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\AuthService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\AuthService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\AuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:53:10.402Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 62,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:53:24.898Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "GroupMembersController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\GroupMembersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\GroupMembersController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\GroupMembersController.cs",
+              "RelativeToolTip": "Controllers\\GroupMembersController.cs",
+              "ViewState": "AgIAADICAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:41:23.82Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\UserService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\UserService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\UserService.cs",
+              "ViewState": "AgIAAM8AAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:42:47.436Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAABUAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-11T18:43:06.036Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAALwAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T18:10:42.167Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\User.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\User.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\User.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\User.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAGBiwA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:33.286Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DayOfWeek.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\DayOfWeek.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\DayOfWeek.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\DayOfWeek.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\DayOfWeek.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAMBcwAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:51.802Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "TagDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\TagDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\TagDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\TagDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\TagDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:20:45.203Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "MembershipStatusDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\MembershipStatusDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\MembershipStatusDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\MembershipStatusDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\MembershipStatusDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:20:48.716Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "Properties\\launchSettings.json",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Properties\\launchSettings.json",
+              "RelativeToolTip": "Properties\\launchSettings.json",
+              "ViewState": "AgIAAAgAAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-11T02:38:19.64Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "UserDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAGBiwCwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:18:42.817Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "DayOfWeekDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\DayOfWeekDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\DayOfWeekDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\DayOfWeekDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\DayOfWeekDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:20:59.075Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "StudyGroupDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\StudyGroupDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\StudyGroupDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\StudyGroupDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\StudyGroupDto.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAMBUwCIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:20:35.737Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "CourseDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\CourseDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\CourseDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\CourseDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\CourseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:20:28.354Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "GroupMemberDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\GroupMemberDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\GroupMemberDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\GroupMemberDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\GroupMemberDto.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAMBUwCEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:20:41.372Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "IDayOfWeekRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IDayOfWeekRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\IDayOfWeekRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IDayOfWeekRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\IDayOfWeekRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:08:19.497Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IDayOfWeekService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IDayOfWeekService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IDayOfWeekService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IDayOfWeekService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IDayOfWeekService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:08:31.571Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "DayOfWeekRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\DayOfWeekRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\DayOfWeekRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\DayOfWeekRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\DayOfWeekRepository.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAIBJwDYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:08:27.242Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "DayOfWeekService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\DayOfWeekService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\DayOfWeekService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\DayOfWeekService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\DayOfWeekService.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAABBwEQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:08:37.624Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "IGroupMemberService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IGroupMemberService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IGroupMemberService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IGroupMemberService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IGroupMemberService.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAMBcwBsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:03:08.988Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "CourseService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\CourseService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\CourseService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\CourseService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\CourseService.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAABBwEoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:01:16.879Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CoursesController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\CoursesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CoursesController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\CoursesController.cs",
+              "RelativeToolTip": "Controllers\\CoursesController.cs",
+              "ViewState": "AgIAAFwAAAAAAAAAAEBVwGAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:01:21.89Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "IEntityTypeRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IEntityTypeRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\IEntityTypeRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IEntityTypeRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\IEntityTypeRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:06:37.135Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "EntityTypesController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\EntityTypesController.cs",
+              "RelativeDocumentMoniker": "Controllers\\EntityTypesController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\EntityTypesController.cs",
+              "RelativeToolTip": "Controllers\\EntityTypesController.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAMBdwCkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:06:55.614Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "IEntityTypeService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IEntityTypeService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IEntityTypeService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IEntityTypeService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IEntityTypeService.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAMBcwBAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:06:46.468Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "EntityTypeRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\EntityTypeRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\EntityTypeRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\EntityTypeRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\EntityTypeRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:06:43.977Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "MembershipStatusRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\MembershipStatusRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\MembershipStatusRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\MembershipStatusRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\MembershipStatusRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:05:50.189Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "MembershipStatusService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\MembershipStatusService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\MembershipStatusService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\MembershipStatusService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\MembershipStatusService.cs",
+              "ViewState": "AgIAAGQAAAAAAAAAAEBVwGgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:05:56.297Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "IMembershipStatusService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IMembershipStatusService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IMembershipStatusService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IMembershipStatusService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IMembershipStatusService.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAMBcwBAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:05:52.611Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "IMembershipStatusRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IMembershipStatusRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\IMembershipStatusRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IMembershipStatusRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\IMembershipStatusRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:05:44.093Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "TagRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\TagRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\TagRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\TagRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\TagRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:04:52.249Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "ITagService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\ITagService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\ITagService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\ITagService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\ITagService.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAMBUwBQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:04:54.638Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "TagService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\TagService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\TagService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\TagService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\TagService.cs",
+              "ViewState": "AgIAAFgAAAAAAAAAAEBVwFwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:04:58.212Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "IStudyGroupRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IStudyGroupRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\IStudyGroupRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IStudyGroupRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\IStudyGroupRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:50:54.219Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "ITagRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\ITagRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\ITagRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\ITagRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\ITagRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:04:46.261Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\IUserRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IUserRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\IUserRepository.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAGBiwBMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:59:53.126Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "StudyGroup.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\StudyGroup.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\StudyGroup.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\StudyGroup.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\StudyGroup.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAIBJwAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:50:51.519Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "GroupMemberService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\GroupMemberService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\GroupMemberService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\GroupMemberService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\GroupMemberService.cs",
+              "ViewState": "AgIAAO4AAAAAAAAAAABRwPEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:03:12.821Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "GroupMemberSql.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\GroupMemberSql.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\SqlQueries\\GroupMemberSql.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\GroupMemberSql.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\SqlQueries\\GroupMemberSql.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAEBVwBMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:02:55.642Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "IGroupMemberRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IGroupMemberRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\IGroupMemberRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\IGroupMemberRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\IGroupMemberRepository.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAMBcwBcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:02:59.926Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "GroupMemberRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\GroupMemberRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\GroupMemberRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\GroupMemberRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\GroupMemberRepository.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAEBVwEcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:03:06.035Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "MembershipStatus.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\MembershipStatus.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\MembershipStatus.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\MembershipStatus.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\MembershipStatus.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAMBcwAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:45.079Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "GroupMember.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\GroupMember.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\GroupMember.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\GroupMember.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\GroupMember.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAMBcwAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:38.363Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Course.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\Course.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\Course.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\Course.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\Course.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAGBiwAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:36.051Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "EntityType.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\EntityType.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\EntityType.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\EntityType.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\EntityType.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAMBcwAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:48.57Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "StudyGroupSql.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\StudyGroupSql.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\SqlQueries\\StudyGroupSql.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\StudyGroupSql.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\SqlQueries\\StudyGroupSql.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAIBJwAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:50:58.087Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Tag.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\Tag.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\Tag.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\Tag.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\Tag.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAMBcwAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:55:41.416Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "ICourseService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\ICourseService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\ICourseService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\ICourseService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\ICourseService.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAMBcwBAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:01:12.783Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "IUserService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IUserService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IUserService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IUserService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IUserService.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAIBgwBgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T02:00:01.632Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "UserRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\UserRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\UserRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\UserRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\UserRepository.cs",
+              "ViewState": "AgIAAFQAAAAAAAAAAIBZwFkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:59:57.562Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "StudyGroupRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\StudyGroupRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\StudyGroupRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\StudyGroupRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\StudyGroupRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:51:03.869Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "StudyGroupService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\StudyGroupService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\StudyGroupService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\StudyGroupService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\StudyGroupService.cs",
+              "ViewState": "AgIAAKMAAAAAAAAAAABRwKYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:51:08.733Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "IStudyGroupService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IStudyGroupService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Interfaces\\IStudyGroupService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Interfaces\\IStudyGroupService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Interfaces\\IStudyGroupService.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAMBUwBAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-11T01:51:06.25Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

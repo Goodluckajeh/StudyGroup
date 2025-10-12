@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IDayOfWeekService, contains business logic for days of week
+    public class DayOfWeekService : IDayOfWeekService
+    {
+        private readonly IDayOfWeekRepository _repository;
+
+        // Injects the day of week repository
+        public DayOfWeekService(IDayOfWeekRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Gets all days of week
+        public async Task<IEnumerable<DayOfWeekEntity>> GetAllDaysAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        // Gets a day of week by ID
+        public async Task<DayOfWeekEntity?> GetDayByIdAsync(int dayId)
+        {
+            return await _repository.GetByIdAsync(dayId);
+        }
+
+        // Creates a new day of week
+        public async Task<int> CreateDayAsync(DayOfWeekEntity day)
+        {
+            return await _repository.CreateAsync(day);
+        }
+
+        // Updates an existing day of week
+        public async Task<bool> UpdateDayAsync(DayOfWeekEntity day)
+        {
+            return await _repository.UpdateAsync(day);
+        }
+
+        // Deletes a day of week by ID
+        public async Task<bool> DeleteDayAsync(int dayId)
+        {
+            return await _repository.DeleteAsync(dayId);
+        }
+    }
+}

@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    // Contains SQL queries for MembershipStatus entity CRUD operations
+    public static class MembershipStatusSql
+    {
+        public const string GetAll = @"SELECT * FROM membership_status";
+        public const string GetById = @"SELECT * FROM membership_status WHERE StatusId = @StatusId";
+        public const string Insert = @"INSERT INTO membership_status (StatusName) VALUES (@StatusName); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE membership_status SET StatusName = @StatusName WHERE StatusId = @StatusId";
+        public const string Delete = @"DELETE FROM membership_status WHERE StatusId = @StatusId";
+    }
+}

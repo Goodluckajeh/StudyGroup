@@ -1,0 +1,301 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Api.Services;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for User endpoints with JWT authentication and automatic skill tag management.
+    /// Creates and manages skill tags automatically when users are created or updated.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints
+    public class UsersController : ControllerBase
+    {
+        private readonly IUserService _service;
+        private readonly AutoTaggingService _autoTaggingService;
+
+        /// <summary>
+        /// Initializes a new instance of the UsersController.
+        /// </summary>
+        /// <param name="service">The user service for handling business logic</param>
+        /// <param name="autoTaggingService">The auto-tagging service for skill tag management</param>
+        public UsersController(IUserService service, AutoTaggingService autoTaggingService)
+        {
+            _service = service;
+            _autoTaggingService = autoTaggingService;
+        }
+
+        /// <summary>
+        /// Gets the current user ID from JWT claims.
+        /// </summary>
+        /// <returns>Current user ID or null if not found</returns>
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : null;
+        }
+
+        /// <summary>
+        /// GET: api/users
+        /// Retrieves all users from the system.
+        /// Password hashes are excluded from the response for security.
+        /// </summary>
+        /// <returns>List of all users without sensitive password data</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _service.GetAllUsersAsync();
+            return Ok(users);
+        }
+
+        /// <summary>
+        /// GET: api/users/{id}
+        /// Retrieves a specific user by their ID.
+        /// Password hash is excluded from the response for security.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user</param>
+        /// <returns>The user details without sensitive data if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var user = await _service.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        /// <summary>
+        /// POST: api/users
+        /// Creates a new user and AUTOMATICALLY creates skill tags based on their skills.
+        /// No need for separate tag creation - this is handled seamlessly.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "firstName": "John",
+        ///   "lastName": "Doe", 
+        ///   "email": "john.doe@example.com",
+        ///   "password": "SecurePassword123!",
+        ///   "skills": "JavaScript, C#, React, Problem Solving",
+        ///   "visibility": true,
+        ///   "bio": "Computer Science student"
+        /// }
+        /// </summary>
+        /// <param name="userDto">The user data including plain text password</param>
+        /// <returns>The created user details with automatic tag creation summary</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateUserDto userDto)
+        {
+            try
+            {
+                // Step 1: Create the user first
+                var userId = await _service.CreateUserAsync(userDto);
+                
+                // Step 2: AUTOMATICALLY create skill tags (no duplicates)
+                var tagsCreated = 0;
+                if (!string.IsNullOrWhiteSpace(userDto.Skills))
+                {
+                    tagsCreated = await _autoTaggingService.CreateUserSkillTagsAsync(userId, userDto.Skills);
+                }
+                
+                // Step 3: Get the created user for response
+                var createdUser = await _service.GetUserByIdAsync(userId);
+                if (createdUser == null)
+                {
+                    return BadRequest(new { Error = "Failed to retrieve created user" });
+                }
+
+                // Parse skills for display
+                var skillsList = !string.IsNullOrEmpty(userDto.Skills) ? 
+                    userDto.Skills.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() : 
+                    new string[0];
+
+                return CreatedAtAction(nameof(GetById), new { id = userId }, new
+                {
+                    User = createdUser,
+                    Message = "? User created successfully!",
+                    AutoTagging = new
+                    {
+                        SkillTagsCreated = tagsCreated,
+                        Skills = skillsList,
+                        Note = tagsCreated > 0 ? 
+                            $"??? {tagsCreated} skill tags created automatically - you're now discoverable by matching interests!" :
+                            "?? No skills provided - add skills to your profile to become discoverable"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to create user", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/users/{id}
+        /// Updates an existing user's information and AUTOMATICALLY refreshes their skill tags.
+        /// Old skill tags are removed, new ones are created based on updated skills.
+        /// Authorization: Users can only update their own profile.
+        /// </summary>
+        /// <param name="id">The ID of the user to update</param>
+        /// <param name="userDto">The updated user data (excluding password and email)</param>
+        /// <returns>Success message with automatic tag update summary</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto userDto)
+        {
+            // Authorization: Users can only update their own profile
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != id)
+            {
+                return Forbid("You can only update your own profile");
+            }
+
+            try
+            {
+                // Step 1: Update the user
+                var success = await _service.UpdateUserAsync(id, userDto);
+                if (!success) return NotFound();
+
+                // Step 2: AUTOMATICALLY update skill tags (removes old, creates new, no duplicates)
+                var tagsCreated = await _autoTaggingService.UpdateUserSkillTagsAsync(id, userDto.Skills);
+
+                // Parse skills for display
+                var skillsList = !string.IsNullOrEmpty(userDto.Skills) ? 
+                    userDto.Skills.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() : 
+                    new string[0];
+
+                return Ok(new
+                {
+                    Message = "? Profile updated successfully!",
+                    AutoTagging = new
+                    {
+                        SkillTagsRefreshed = true,
+                        NewSkillTagsCreated = tagsCreated,
+                        UpdatedSkills = skillsList,
+                        Note = tagsCreated > 0 ? 
+                            $"?? Skill tags refreshed - {tagsCreated} new tags created based on your updated skills!" :
+                            "?? Skill tags cleared - add skills to make yourself discoverable"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to update user", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/users/{id}
+        /// Deletes a user by their ID.
+        /// This will AUTOMATICALLY remove all associated skill tags and group memberships.
+        /// Authorization: Users can only delete their own account.
+        /// </summary>
+        /// <param name="id">The ID of the user to delete</param>
+        /// <returns>Success message confirming deletion and automatic cleanup</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            // Authorization: Users can only delete their own account
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != id)
+            {
+                return Forbid("You can only delete your own account");
+            }
+
+            try
+            {
+                // Step 1: Clean up skill tags before deleting user
+                await _autoTaggingService.RemoveUserSkillTagsAsync(id);
+
+                // Step 2: Delete the user (group memberships cascade delete automatically)
+                var success = await _service.DeleteUserAsync(id);
+                if (!success) return NotFound();
+                
+                return Ok(new 
+                { 
+                    Message = "? Account deleted successfully!",
+                    AutoCleanup = new
+                    {
+                        SkillTagsRemoved = true,
+                        GroupMembershipsRemoved = true,
+                        Note = "All associated data has been automatically cleaned up"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to delete user", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/users/{id}/change-password
+        /// Changes a user's password after verifying their current password.
+        /// The new password is automatically hashed using SHA256 before storage.
+        /// Authorization: Users can only change their own password.
+        /// </summary>
+        /// <param name="id">The ID of the user changing their password</param>
+        /// <param name="changePasswordDto">The current and new password data</param>
+        /// <returns>Success message if changed, BadRequest if validation fails, Forbid if not authorized</returns>
+        [HttpPut("{id}/change-password")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDto changePasswordDto)
+        {
+            // Authorization: Users can only change their own password
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != id)
+            {
+                return Forbid("You can only change your own password");
+            }
+
+            // Validate that new passwords match
+            if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
+            {
+                return BadRequest(new { Error = "New password and confirmation do not match" });
+            }
+
+            // Validate password strength
+            if (changePasswordDto.NewPassword.Length < 6)
+            {
+                return BadRequest(new { Error = "New password must be at least 6 characters long" });
+            }
+
+            var success = await _service.ChangePasswordAsync(id, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            
+            if (!success)
+            {
+                return BadRequest(new { Error = "Current password is incorrect or user not found" });
+            }
+
+            return Ok(new { Message = "Password changed successfully" });
+        }
+
+        /// <summary>
+        /// GET: api/users/me
+        /// Gets the current authenticated user's profile information.
+        /// </summary>
+        /// <returns>Current user's profile data</returns>
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var user = await _service.GetUserByIdAsync(currentUserId.Value);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(user);
+        }
+    }
+}

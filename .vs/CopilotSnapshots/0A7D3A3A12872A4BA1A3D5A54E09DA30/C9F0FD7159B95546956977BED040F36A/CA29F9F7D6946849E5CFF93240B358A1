@@ -1,0 +1,69 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for Course endpoints
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CoursesController : ControllerBase
+    {
+        private readonly ICourseService _service;
+
+        // Injects the course service
+        public CoursesController(ICourseService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/courses
+        // Returns all courses
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var courses = await _service.GetAllCoursesAsync();
+            return Ok(courses);
+        }
+
+        // GET: api/courses/{id}
+        // Returns a course by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var course = await _service.GetCourseByIdAsync(id);
+            if (course == null) return NotFound();
+            return Ok(course);
+        }
+
+        // POST: api/courses
+        // Creates a new course
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Course course)
+        {
+            var id = await _service.CreateCourseAsync(course);
+            return CreatedAtAction(nameof(GetById), new { id }, course);
+        }
+
+        // PUT: api/courses/{id}
+        // Updates an existing course
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Course course)
+        {
+            course.CourseId = id;
+            var success = await _service.UpdateCourseAsync(course);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/courses/{id}
+        // Deletes a course by ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteCourseAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

@@ -1,0 +1,16 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace StudyGroup.Data.Models
+{
+    public class Course
+    {
+        [Column("course_id")]
+        public int CourseId { get; set; }
+        [Column("course_code")]
+        public string CourseCode { get; set; } = string.Empty;
+        [Column("course_name")]
+        public string CourseName { get; set; } = string.Empty;
+        [Column("description")]
+        public string? Description { get; set; }
+    }
+}

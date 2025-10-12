@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Service.Interfaces
+{
+    // Interface for DayOfWeek service, defines business logic methods
+    public interface IDayOfWeekService
+    {
+        Task<IEnumerable<DayOfWeekEntity>> GetAllDaysAsync();
+        Task<DayOfWeekEntity?> GetDayByIdAsync(int dayId);
+        Task<int> CreateDayAsync(DayOfWeekEntity day);
+        Task<bool> UpdateDayAsync(DayOfWeekEntity day);
+        Task<bool> DeleteDayAsync(int dayId);
+    }
+}

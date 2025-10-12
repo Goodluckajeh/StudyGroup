@@ -1,0 +1,57 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Api.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class StudyGroupsController : ControllerBase
+    {
+        private readonly IStudyGroupService _service;
+
+        public StudyGroupsController(IStudyGroupService service)
+        {
+            _service = service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var groups = await _service.GetAllGroupsAsync();
+            return Ok(groups);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var group = await _service.GetGroupByIdAsync(id);
+            if (group == null) return NotFound();
+            return Ok(group);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] StudyGroup group)
+        {
+            var id = await _service.CreateGroupAsync(group);
+            return CreatedAtAction(nameof(GetById), new { id }, group);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] StudyGroup group)
+        {
+            group.GroupId = id;
+            var success = await _service.UpdateGroupAsync(group);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteGroupAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

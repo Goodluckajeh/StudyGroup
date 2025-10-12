@@ -1,0 +1,283 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for Tag endpoints with clean CRUD operations.
+    /// Tags are automatically created when users and study groups are created/updated.
+    /// This controller provides manual tag management and querying capabilities.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints
+    public class TagsController : ControllerBase
+    {
+        private readonly ITagService _service;
+
+        /// <summary>
+        /// Initializes a new instance of the TagsController.
+        /// </summary>
+        /// <param name="service">The tag service for handling business logic</param>
+        public TagsController(ITagService service)
+        {
+            _service = service;
+        }
+
+        #region Standard CRUD Operations
+
+        /// <summary>
+        /// GET: api/tags
+        /// Retrieves all tags from the system.
+        /// Shows both user skill tags and study group course tags.
+        /// </summary>
+        /// <returns>List of all tags with their entity associations</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var tags = await _service.GetAllTagsAsync();
+            var tagList = tags.ToList();
+            
+            return Ok(new
+            {
+                Tags = tagList,
+                Count = tagList.Count,
+                Summary = new
+                {
+                    UserSkillTags = tagList.Count(t => t.EntityTypeId == 1),
+                    StudyGroupCourseTags = tagList.Count(t => t.EntityTypeId == 4),
+                    Total = tagList.Count
+                }
+            });
+        }
+
+        /// <summary>
+        /// GET: api/tags/{id}
+        /// Retrieves a specific tag by its ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the tag</param>
+        /// <returns>The tag details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var tag = await _service.GetTagByIdAsync(id);
+            if (tag == null) return NotFound();
+            return Ok(tag);
+        }
+
+        /// <summary>
+        /// POST: api/tags
+        /// Creates a new tag manually (rarely needed - tags are usually created automatically).
+        /// 
+        /// Example request body:
+        /// {
+        ///   "name": "Python",
+        ///   "entityTypeId": 1,
+        ///   "entityId": 123
+        /// }
+        /// </summary>
+        /// <param name="tagDto">The tag data including entity association</param>
+        /// <returns>The created tag with its new ID</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTagDto tagDto)
+        {
+            try
+            {
+                var id = await _service.CreateTagAsync(tagDto);
+                return CreatedAtAction(nameof(GetById), new { id }, new
+                {
+                    TagId = id,
+                    Message = "Tag created successfully",
+                    Note = "💡 Tip: Tags are usually created automatically when users add skills or study groups specify courses"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to create tag", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/tags/{id}
+        /// Updates an existing tag.
+        /// </summary>
+        /// <param name="id">The ID of the tag to update</param>
+        /// <param name="tagDto">The updated tag data</param>
+        /// <returns>NoContent if successful, NotFound if tag doesn't exist</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateTagDto tagDto)
+        {
+            var success = await _service.UpdateTagAsync(id, tagDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE: api/tags/{id}
+        /// Removes a tag by its ID.
+        /// Note: Tags are automatically removed when associated users/study groups are deleted.
+        /// </summary>
+        /// <param name="id">The ID of the tag to delete</param>
+        /// <returns>NoContent if successful, NotFound if tag doesn't exist</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteTagAsync(id);
+            if (!success) return NotFound();
+            return Ok(new 
+            { 
+                Message = "Tag deleted successfully",
+                Note = "💡 Tags are automatically managed when users update skills or study groups update courses"
+            });
+        }
+
+        #endregion
+
+        #region Entity-Specific Tag Queries
+
+        /// <summary>
+        /// GET: api/tags/users/{userId}
+        /// Gets all skill tags for a specific user.
+        /// </summary>
+        /// <param name="userId">The user ID</param>
+        /// <returns>List of skill tags associated with the user</returns>
+        [HttpGet("users/{userId}")]
+        public async Task<IActionResult> GetUserSkillTags(int userId)
+        {
+            var tags = await _service.GetTagsByEntityAsync(1, userId); // EntityType 1 = User
+            var tagList = tags.ToList();
+            
+            return Ok(new
+            {
+                UserId = userId,
+                EntityType = "User Skills",
+                Tags = tagList,
+                Count = tagList.Count,
+                SkillNames = tagList.Select(t => t.Name).ToList()
+            });
+        }
+
+        /// <summary>
+        /// GET: api/tags/studygroups/{groupId}
+        /// Gets all course tags for a specific study group.
+        /// </summary>
+        /// <param name="groupId">The study group ID</param>
+        /// <returns>List of course tags associated with the study group</returns>
+        [HttpGet("studygroups/{groupId}")]
+        public async Task<IActionResult> GetStudyGroupCourseTags(int groupId)
+        {
+            var tags = await _service.GetTagsByEntityAsync(4, groupId); // EntityType 4 = StudyGroup
+            var tagList = tags.ToList();
+            
+            return Ok(new
+            {
+                StudyGroupId = groupId,
+                EntityType = "Study Group Course Tags",
+                Tags = tagList,
+                Count = tagList.Count,
+                CourseTopics = tagList.Select(t => t.Name).ToList()
+            });
+        }
+
+        /// <summary>
+        /// GET: api/tags/users
+        /// Gets all user skill tags in the system.
+        /// </summary>
+        /// <returns>List of all user skill tags</returns>
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUserSkillTags()
+        {
+            var tags = await _service.GetTagsByEntityTypeAsync(1); // EntityType 1 = User
+            var tagList = tags.ToList();
+            
+            return Ok(new
+            {
+                EntityType = "All User Skills",
+                Tags = tagList,
+                Count = tagList.Count,
+                UniqueSkills = tagList.Select(t => t.Name).Distinct().ToList(),
+                Note = "These are automatically generated from user skill profiles"
+            });
+        }
+
+        /// <summary>
+        /// GET: api/tags/studygroups
+        /// Gets all study group course tags in the system.
+        /// </summary>
+        /// <returns>List of all study group course tags</returns>
+        [HttpGet("studygroups")]
+        public async Task<IActionResult> GetAllStudyGroupCourseTags()
+        {
+            var tags = await _service.GetTagsByEntityTypeAsync(4); // EntityType 4 = StudyGroup
+            var tagList = tags.ToList();
+            
+            return Ok(new
+            {
+                EntityType = "All Study Group Course Tags",
+                Tags = tagList,
+                Count = tagList.Count,
+                UniqueTopics = tagList.Select(t => t.Name).Distinct().ToList(),
+                Note = "These are automatically generated from study group course information"
+            });
+        }
+
+        #endregion
+
+        #region Utility Endpoints
+
+        /// <summary>
+        /// GET: api/tags/stats
+        /// Gets statistics about the tagging system.
+        /// </summary>
+        /// <returns>Tagging system statistics</returns>
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetTagStats()
+        {
+            var allTags = await _service.GetAllTagsAsync();
+            var tagList = allTags.ToList();
+            
+            var userTags = tagList.Where(t => t.EntityTypeId == 1).ToList();
+            var studyGroupTags = tagList.Where(t => t.EntityTypeId == 4).ToList();
+            
+            return Ok(new
+            {
+                Message = "🏷️ Tag System Statistics",
+                OverallStats = new
+                {
+                    TotalTags = tagList.Count,
+                    UserSkillTags = userTags.Count,
+                    StudyGroupCourseTags = studyGroupTags.Count
+                },
+                SkillStats = new
+                {
+                    UniqueSkills = userTags.Select(t => t.Name).Distinct().Count(),
+                    UsersWithSkillTags = userTags.Select(t => t.EntityId).Distinct().Count(),
+                    MostPopularSkills = userTags.GroupBy(t => t.Name)
+                                                .OrderByDescending(g => g.Count())
+                                                .Take(10)
+                                                .Select(g => new { Skill = g.Key, Count = g.Count() })
+                                                .ToList()
+                },
+                CourseStats = new
+                {
+                    UniqueCourseTopics = studyGroupTags.Select(t => t.Name).Distinct().Count(),
+                    StudyGroupsWithTags = studyGroupTags.Select(t => t.EntityId).Distinct().Count(),
+                    MostPopularTopics = studyGroupTags.GroupBy(t => t.Name)
+                                                     .OrderByDescending(g => g.Count())
+                                                     .Take(10)
+                                                     .Select(g => new { Topic = g.Key, Count = g.Count() })
+                                                     .ToList()
+                },
+                SystemInfo = new
+                {
+                    AutoTaggingEnabled = true,
+                    Note = "Tags are automatically created/updated when users modify skills or study groups change courses"
+                }
+            });
+        }
+
+        #endregion
+    }
+}

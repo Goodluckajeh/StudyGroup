@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IGroupMemberService, contains business logic for group members
+    public class GroupMemberService : IGroupMemberService
+    {
+        private readonly IGroupMemberRepository _repository;
+
+        // Injects the group member repository
+        public GroupMemberService(IGroupMemberRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Gets all group members
+        public async Task<IEnumerable<GroupMember>> GetAllGroupMembersAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        // Gets a group member by ID
+        public async Task<GroupMember?> GetGroupMemberByIdAsync(int groupMemberId)
+        {
+            return await _repository.GetByIdAsync(groupMemberId);
+        }
+
+        // Creates a new group member
+        public async Task<int> CreateGroupMemberAsync(GroupMember groupMember)
+        {
+            return await _repository.CreateAsync(groupMember);
+        }
+
+        // Updates an existing group member
+        public async Task<bool> UpdateGroupMemberAsync(GroupMember groupMember)
+        {
+            return await _repository.UpdateAsync(groupMember);
+        }
+
+        // Deletes a group member by ID
+        public async Task<bool> DeleteGroupMemberAsync(int groupMemberId)
+        {
+            return await _repository.DeleteAsync(groupMemberId);
+        }
+    }
+}

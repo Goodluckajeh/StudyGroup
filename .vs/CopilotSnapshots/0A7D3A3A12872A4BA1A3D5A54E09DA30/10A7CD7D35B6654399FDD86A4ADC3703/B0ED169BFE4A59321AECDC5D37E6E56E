@@ -1,0 +1,68 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IMembershipStatusService, contains business logic for membership statuses
+    public class MembershipStatusService : IMembershipStatusService
+    {
+        private readonly IMembershipStatusRepository _repository;
+
+        // Injects the membership status repository
+        public MembershipStatusService(IMembershipStatusRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps MembershipStatus model (PascalCase) to MembershipStatusDto (PascalCase)
+        private MembershipStatusDto MapToDto(MembershipStatus status) => new MembershipStatusDto
+        {
+            StatusId = status.StatusId,
+            StatusName = status.StatusName
+        };
+
+        // Gets all membership statuses
+        public async Task<IEnumerable<MembershipStatusDto>> GetAllStatusesAsync()
+        {
+            var statuses = await _repository.GetAllAsync();
+            return statuses.Select(MapToDto);
+        }
+
+        // Gets a membership status by ID
+        public async Task<MembershipStatusDto?> GetStatusByIdAsync(int statusId)
+        {
+            var status = await _repository.GetByIdAsync(statusId);
+            return status == null ? null : MapToDto(status);
+        }
+
+        // Creates a new membership status
+        public async Task<int> CreateStatusAsync(CreateMembershipStatusDto statusDto)
+        {
+            var status = new MembershipStatus
+            {
+                StatusName = statusDto.StatusName
+            };
+            return await _repository.CreateAsync(status);
+        }
+
+        // Updates an existing membership status
+        public async Task<bool> UpdateStatusAsync(int statusId, UpdateMembershipStatusDto statusDto)
+        {
+            var status = await _repository.GetByIdAsync(statusId);
+            if (status == null) return false;
+            status.StatusName = statusDto.StatusName;
+            return await _repository.UpdateAsync(status);
+        }
+
+        // Deletes a membership status by ID
+        public async Task<bool> DeleteStatusAsync(int statusId)
+        {
+            return await _repository.DeleteAsync(statusId);
+        }
+    }
+}

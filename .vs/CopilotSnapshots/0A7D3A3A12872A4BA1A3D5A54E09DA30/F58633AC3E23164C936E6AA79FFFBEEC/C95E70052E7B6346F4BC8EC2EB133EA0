@@ -1,0 +1,22 @@
+﻿{
+
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=DatabaseProject;Trusted_Connection=True;Encrypt=False;"
+  },
+
+  "Jwt": {
+    "SecretKey": "YourSuperSecretKeyThatShouldBeAtLeast32CharactersLongForSecurity!",
+    "Issuer": "StudyGroupApi",
+    "Audience": "StudyGroupUsers",
+    "ExpirationMinutes": "60"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+
+}

@@ -1,0 +1,54 @@
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.SqlQueries;
+
+namespace StudyGroup.Data.Repositories
+{
+    // Implements IGroupMemberRepository using Dapper for data access
+    public class GroupMemberRepository : IGroupMemberRepository
+    {
+        private readonly IDbConnection _dbConnection;
+
+        // Injects the database connection
+        public GroupMemberRepository(IDbConnection dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
+        // Gets all group members from the database
+        public async Task<IEnumerable<GroupMember>> GetAllAsync()
+        {
+            return await _dbConnection.QueryAsync<GroupMember>(GroupMemberSql.GetAll);
+        }
+
+        // Gets a single group member by its ID
+        public async Task<GroupMember?> GetByIdAsync(int groupMemberId)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<GroupMember>(GroupMemberSql.GetById, new { GroupMemberId = groupMemberId });
+        }
+
+        // Inserts a new group member and returns its ID
+        public async Task<int> CreateAsync(GroupMember groupMember)
+        {
+            return await _dbConnection.QuerySingleAsync<int>(GroupMemberSql.Insert, groupMember);
+        }
+
+        // Updates an existing group member
+        public async Task<bool> UpdateAsync(GroupMember groupMember)
+        {
+            var affected = await _dbConnection.ExecuteAsync(GroupMemberSql.Update, groupMember);
+            return affected > 0;
+        }
+
+        // Deletes a group member by its ID
+        public async Task<bool> DeleteAsync(int groupMemberId)
+        {
+            var affected = await _dbConnection.ExecuteAsync(GroupMemberSql.Delete, new { GroupMemberId = groupMemberId });
+            return affected > 0;
+        }
+    }
+}

@@ -1,0 +1,59 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Read-only API controller for MembershipStatus endpoints (lookup/enum table).
+    /// Provides access to predefined membership status types like "Pending", "Active", "Rejected", etc.
+    /// These statuses are used to track the state of user memberships in study groups.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MembershipStatusesController : ControllerBase
+    {
+        private readonly IMembershipStatusService _service;
+
+        /// <summary>
+        /// Initializes a new instance of the MembershipStatusesController.
+        /// </summary>
+        /// <param name="service">The membership status service for handling business logic</param>
+        public MembershipStatusesController(IMembershipStatusService service)
+        {
+            _service = service;
+        }
+
+        /// <summary>
+        /// GET: api/membershipstatuses
+        /// Retrieves all available membership status types.
+        /// Used for populating dropdowns, filtering options, and displaying status names in the UI.
+        /// Common statuses include: Pending, Active, Inactive, Rejected, Left.
+        /// </summary>
+        /// <returns>List of all membership status types with their IDs and names</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var statuses = await _service.GetAllStatusesAsync();
+            return Ok(statuses);
+        }
+
+        /// <summary>
+        /// GET: api/membershipstatuses/{id}
+        /// Retrieves a specific membership status by its unique ID.
+        /// Useful for getting the display name of a status when you have only the ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the membership status</param>
+        /// <returns>The membership status details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var status = await _service.GetStatusByIdAsync(id);
+            if (status == null) return NotFound();
+            return Ok(status);
+        }
+
+        // POST, PUT, DELETE endpoints removed - this is lookup/enum data
+        // Membership statuses should be predefined and managed through database seeding or admin tools
+        // If modifications are needed, they should be done through proper database migration scripts
+    }
+}

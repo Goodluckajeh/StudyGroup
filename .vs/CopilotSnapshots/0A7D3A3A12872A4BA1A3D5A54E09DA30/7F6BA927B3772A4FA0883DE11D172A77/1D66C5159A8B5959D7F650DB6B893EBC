@@ -1,0 +1,71 @@
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.SqlQueries;
+
+namespace StudyGroup.Data.Repositories
+{
+    // Implements IGroupMemberRepository using Dapper for data access
+    public class GroupMemberRepository : IGroupMemberRepository
+    {
+        private readonly IDbConnection _dbConnection;
+
+        // Injects the database connection
+        public GroupMemberRepository(IDbConnection dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
+        // Basic CRUD operations
+        public async Task<IEnumerable<GroupMember>> GetAllAsync()
+        {
+            return await _dbConnection.QueryAsync<GroupMember>(GroupMemberSql.GetAll);
+        }
+
+        public async Task<GroupMember?> GetByIdAsync(int groupMemberId)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<GroupMember>(GroupMemberSql.GetById, new { GroupMemberId = groupMemberId });
+        }
+
+        public async Task<int> CreateAsync(GroupMember groupMember)
+        {
+            return await _dbConnection.QuerySingleAsync<int>(GroupMemberSql.Insert, groupMember);
+        }
+
+        public async Task<bool> UpdateAsync(GroupMember groupMember)
+        {
+            var affected = await _dbConnection.ExecuteAsync(GroupMemberSql.Update, groupMember);
+            return affected > 0;
+        }
+
+        public async Task<bool> DeleteAsync(int groupMemberId)
+        {
+            var affected = await _dbConnection.ExecuteAsync(GroupMemberSql.Delete, new { GroupMemberId = groupMemberId });
+            return affected > 0;
+        }
+
+        // Specialized queries for membership management
+        public async Task<IEnumerable<GroupMember>> GetByGroupIdAsync(int groupId)
+        {
+            return await _dbConnection.QueryAsync<GroupMember>(GroupMemberSql.GetByGroupId, new { GroupId = groupId });
+        }
+
+        public async Task<IEnumerable<GroupMember>> GetByUserIdAsync(int userId)
+        {
+            return await _dbConnection.QueryAsync<GroupMember>(GroupMemberSql.GetByUserId, new { UserId = userId });
+        }
+
+        public async Task<IEnumerable<GroupMember>> GetByGroupIdAndStatusAsync(int groupId, int statusId)
+        {
+            return await _dbConnection.QueryAsync<GroupMember>(GroupMemberSql.GetByGroupIdAndStatus, new { GroupId = groupId, StatusId = statusId });
+        }
+
+        public async Task<GroupMember?> GetByGroupIdAndUserIdAsync(int groupId, int userId)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<GroupMember>(GroupMemberSql.GetByGroupIdAndUserId, new { GroupId = groupId, UserId = userId });
+        }
+    }
+}

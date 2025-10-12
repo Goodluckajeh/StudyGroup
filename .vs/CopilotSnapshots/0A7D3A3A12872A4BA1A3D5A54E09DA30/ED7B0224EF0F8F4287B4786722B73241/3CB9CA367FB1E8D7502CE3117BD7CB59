@@ -1,0 +1,41 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Api.Controllers
+{
+    // Read-only API controller for DayOfWeek endpoints (lookup/enum table)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DaysOfWeekController : ControllerBase
+    {
+        private readonly IDayOfWeekService _service;
+
+        // Injects the day of week service
+        public DaysOfWeekController(IDayOfWeekService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/daysofweek
+        // Returns all days of week (read-only lookup data)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var days = await _service.GetAllDaysAsync();
+            return Ok(days);
+        }
+
+        // GET: api/daysofweek/{id}
+        // Returns a specific day of week by ID (read-only lookup data)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var day = await _service.GetDayByIdAsync(id);
+            if (day == null) return NotFound();
+            return Ok(day);
+        }
+
+        // POST, PUT, DELETE endpoints removed - this is lookup/enum data
+        // Days of the week are static and should not be modified through the API
+    }
+}

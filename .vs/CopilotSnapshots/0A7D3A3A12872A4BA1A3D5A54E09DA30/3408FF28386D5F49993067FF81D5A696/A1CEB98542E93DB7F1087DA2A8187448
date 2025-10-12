@@ -1,0 +1,73 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    public class StudyGroupService : IStudyGroupService
+    {
+        private readonly IStudyGroupRepository _repository;
+
+        public StudyGroupService(IStudyGroupRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps StudyGroup to StudyGroupDto
+        private StudyGroupDto MapToDto(StudyGroup group) => new StudyGroupDto
+        {
+            GroupId = group.GroupId,
+            CourseId = group.CourseId,
+            CreatorId = group.CreatorId,
+            Topic = group.Topic,
+            TimeSlot = group.TimeSlot,
+            Description = group.Description
+        };
+
+        public async Task<IEnumerable<StudyGroupDto>> GetAllGroupsAsync()
+        {
+            var groups = await _repository.GetAllAsync();
+            return groups.Select(MapToDto);
+        }
+
+        public async Task<StudyGroupDto?> GetGroupByIdAsync(int groupId)
+        {
+            var group = await _repository.GetByIdAsync(groupId);
+            return group == null ? null : MapToDto(group);
+        }
+
+        public async Task<int> CreateGroupAsync(CreateStudyGroupDto groupDto)
+        {
+            var group = new StudyGroup
+            {
+                CourseId = groupDto.CourseId,
+                CreatorId = groupDto.CreatorId,
+                Topic = groupDto.Topic,
+                TimeSlot = groupDto.TimeSlot,
+                Description = groupDto.Description
+            };
+            return await _repository.CreateAsync(group);
+        }
+
+        public async Task<bool> UpdateGroupAsync(int groupId, UpdateStudyGroupDto groupDto)
+        {
+            var group = await _repository.GetByIdAsync(groupId);
+            if (group == null) return false;
+            group.CourseId = groupDto.CourseId;
+            group.CreatorId = groupDto.CreatorId;
+            group.Topic = groupDto.Topic;
+            group.TimeSlot = groupDto.TimeSlot;
+            group.Description = groupDto.Description;
+            return await _repository.UpdateAsync(group);
+        }
+
+        public async Task<bool> DeleteGroupAsync(int groupId)
+        {
+            return await _repository.DeleteAsync(groupId);
+        }
+    }
+}

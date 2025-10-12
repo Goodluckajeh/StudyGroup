@@ -1,0 +1,92 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements ITagService, contains business logic for tags
+    public class TagService : ITagService
+    {
+        private readonly ITagRepository _repository;
+
+        // Injects the tag repository
+        public TagService(ITagRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps Tag model (PascalCase) to TagDto (PascalCase)
+        private TagDto MapToDto(Tag tag) => new TagDto
+        {
+            TagId = tag.TagId,
+            Name = tag.Name,
+            EntityTypeId = tag.EntityTypeId,
+            EntityId = tag.EntityId
+        };
+
+        // Gets all tags
+        public async Task<IEnumerable<TagDto>> GetAllTagsAsync()
+        {
+            var tags = await _repository.GetAllAsync();
+            return tags.Select(MapToDto);
+        }
+
+        // Gets a tag by ID
+        public async Task<TagDto?> GetTagByIdAsync(int tagId)
+        {
+            var tag = await _repository.GetByIdAsync(tagId);
+            return tag == null ? null : MapToDto(tag);
+        }
+
+        // Creates a new tag
+        public async Task<int> CreateTagAsync(CreateTagDto tagDto)
+        {
+            var tag = new Tag
+            {
+                Name = tagDto.Name,
+                EntityTypeId = tagDto.EntityTypeId,
+                EntityId = tagDto.EntityId
+            };
+            return await _repository.CreateAsync(tag);
+        }
+
+        // Updates an existing tag
+        public async Task<bool> UpdateTagAsync(int tagId, UpdateTagDto tagDto)
+        {
+            var tag = await _repository.GetByIdAsync(tagId);
+            if (tag == null) return false;
+            
+            tag.Name = tagDto.Name;
+            tag.EntityTypeId = tagDto.EntityTypeId;
+            tag.EntityId = tagDto.EntityId;
+            
+            return await _repository.UpdateAsync(tag);
+        }
+
+        // Deletes a tag by ID
+        public async Task<bool> DeleteTagAsync(int tagId)
+        {
+            return await _repository.DeleteAsync(tagId);
+        }
+
+        // Gets all tags for a specific entity (e.g., all tags for user ID 5)
+        public async Task<IEnumerable<TagDto>> GetTagsByEntityAsync(int entityTypeId, int entityId)
+        {
+            var allTags = await _repository.GetAllAsync();
+            var entityTags = allTags.Where(t => t.EntityTypeId == entityTypeId && t.EntityId == entityId);
+            return entityTags.Select(MapToDto);
+        }
+
+        // Gets all tags for a specific entity type (e.g., all user tags)
+        public async Task<IEnumerable<TagDto>> GetTagsByEntityTypeAsync(int entityTypeId)
+        {
+            var allTags = await _repository.GetAllAsync();
+            var typeTags = allTags.Where(t => t.EntityTypeId == entityTypeId);
+            return typeTags.Select(MapToDto);
+        }
+    }
+}

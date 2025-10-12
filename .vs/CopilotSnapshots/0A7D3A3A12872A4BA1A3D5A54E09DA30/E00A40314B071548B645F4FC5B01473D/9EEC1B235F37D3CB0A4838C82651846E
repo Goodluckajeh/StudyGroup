@@ -1,0 +1,77 @@
+﻿using StudyGroup.Service.DTOs;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Services.Interfaces
+{
+    /// <summary>
+    /// Interface for authentication services.
+    /// Handles user authentication, JWT token generation, and user context management.
+    /// Centralized authentication logic for the entire application.
+    /// </summary>
+    public interface IAuthService
+    {
+        /// <summary>
+        /// Authenticates a user by email and password.
+        /// </summary>
+        /// <param name="email">User's email address</param>
+        /// <param name="password">User's password</param>
+        /// <returns>JWT token if authentication successful, null otherwise</returns>
+        Task<string?> AuthenticateAsync(string email, string password);
+
+        /// <summary>
+        /// Registers a new user with domain validation.
+        /// </summary>
+        /// <param name="model">User registration data</param>
+        /// <returns>True if registration successful, false otherwise</returns>
+        Task<bool> RegisterAsync(CreateUserDto model);
+
+        /// <summary>
+        /// Validates a JWT token and extracts user information.
+        /// </summary>
+        /// <param name="token">The JWT token to validate</param>
+        /// <returns>ClaimsPrincipal if token is valid, null otherwise</returns>
+        ClaimsPrincipal? ValidateToken(string token);
+
+        /// <summary>
+        /// Extracts the user ID from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>User ID if found, null otherwise</returns>
+        int? GetUserIdFromClaims(ClaimsPrincipal user);
+
+        /// <summary>
+        /// Extracts the user email from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>User email if found, null otherwise</returns>
+        string? GetUserEmailFromClaims(ClaimsPrincipal user);
+
+        /// <summary>
+        /// Extracts the user's full name from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>User's full name if found, null otherwise</returns>
+        string? GetUserNameFromClaims(ClaimsPrincipal user);
+
+        /// <summary>
+        /// Gets the current authenticated user's profile from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>UserDto with basic user information from token claims</returns>
+        UserDto? GetCurrentUserFromClaims(ClaimsPrincipal user);
+
+        /// <summary>
+        /// Checks if the current user can access data for a specific user ID.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <param name="targetUserId">The user ID being accessed</param>
+        /// <returns>True if access is allowed, false otherwise</returns>
+        bool CanAccessUserData(ClaimsPrincipal user, int targetUserId);
+
+        /// <summary>
+        /// Gets the token expiration time in hours.
+        /// </summary>
+        /// <returns>Expiration time in hours</returns>
+        int GetTokenExpirationHours();
+    }
+}

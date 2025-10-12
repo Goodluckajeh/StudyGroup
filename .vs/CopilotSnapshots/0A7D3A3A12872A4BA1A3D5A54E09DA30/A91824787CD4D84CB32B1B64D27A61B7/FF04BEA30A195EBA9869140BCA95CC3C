@@ -1,0 +1,154 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    /// <summary>
+    /// Implements IStudyGroupService, contains business logic for study groups.
+    /// Handles course name resolution for user-friendly group creation.
+    /// </summary>
+    public class StudyGroupService : IStudyGroupService
+    {
+        private readonly IStudyGroupRepository _repository;
+        private readonly ICourseRepository _courseRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the StudyGroupService.
+        /// </summary>
+        /// <param name="repository">The study group repository for data access</param>
+        /// <param name="courseRepository">The course repository for course name lookup</param>
+        public StudyGroupService(IStudyGroupRepository repository, ICourseRepository courseRepository)
+        {
+            _repository = repository;
+            _courseRepository = courseRepository;
+        }
+
+        /// <summary>
+        /// Maps StudyGroup model (PascalCase) to StudyGroupDto (PascalCase).
+        /// Includes course name lookup for better user experience.
+        /// </summary>
+        /// <param name="group">The study group model from database</param>
+        /// <returns>DTO representation with course name included</returns>
+        private async Task<StudyGroupDto> MapToDtoAsync(StudyGroup.Data.Models.StudyGroup group)
+        {
+            // Look up course name for display purposes
+            var course = await _courseRepository.GetByIdAsync(group.CourseId);
+            
+            return new StudyGroupDto
+            {
+                GroupId = group.GroupId,
+                CourseId = group.CourseId,
+                CourseName = course?.CourseName ?? "Unknown Course",
+                CreatorId = group.CreatorId,
+                Topic = group.Topic,
+                TimeSlot = group.TimeSlot,
+                Description = group.Description
+            };
+        }
+
+        /// <summary>
+        /// Retrieves all study groups with course names included.
+        /// </summary>
+        /// <returns>All study groups with course information</returns>
+        public async Task<IEnumerable<StudyGroupDto>> GetAllGroupsAsync()
+        {
+            var groups = await _repository.GetAllAsync();
+            var groupDtos = new List<StudyGroupDto>();
+            
+            foreach (var group in groups)
+            {
+                var dto = await MapToDtoAsync(group);
+                groupDtos.Add(dto);
+            }
+            
+            return groupDtos;
+        }
+
+        /// <summary>
+        /// Gets a study group by ID with course name included.
+        /// </summary>
+        /// <param name="groupId">The unique identifier of the study group</param>
+        /// <returns>The study group with course information if found, null otherwise</returns>
+        public async Task<StudyGroupDto?> GetGroupByIdAsync(int groupId)
+        {
+            var group = await _repository.GetByIdAsync(groupId);
+            if (group == null) return null;
+            
+            return await MapToDtoAsync(group);
+        }
+
+        /// <summary>
+        /// Creates a new study group using course name instead of course ID.
+        /// Resolves the course name to the corresponding course ID automatically.
+        /// </summary>
+        /// <param name="groupDto">The study group data with course name</param>
+        /// <returns>The ID of the created study group</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the course name is not found</exception>
+        public async Task<int> CreateGroupAsync(CreateStudyGroupDto groupDto)
+        {
+            // Look up course by name to get the ID
+            var course = await _courseRepository.GetByNameAsync(groupDto.CourseName);
+            if (course == null)
+            {
+                throw new InvalidOperationException($"Course '{groupDto.CourseName}' not found. Please check the course name and try again.");
+            }
+
+            // Create study group with resolved course ID
+            var group = new StudyGroup.Data.Models.StudyGroup
+            {
+                CourseId = course.CourseId,  // Use the resolved course ID
+                CreatorId = groupDto.CreatorId,
+                Topic = groupDto.Topic,
+                TimeSlot = groupDto.TimeSlot,
+                Description = groupDto.Description
+            };
+            
+            return await _repository.CreateAsync(group);
+        }
+
+        /// <summary>
+        /// Updates an existing study group using course name instead of course ID.
+        /// Resolves the course name to the corresponding course ID automatically.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group to update</param>
+        /// <param name="groupDto">The updated study group data with course name</param>
+        /// <returns>True if updated successfully, false if group not found</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the course name is not found</exception>
+        public async Task<bool> UpdateGroupAsync(int groupId, UpdateStudyGroupDto groupDto)
+        {
+            var group = await _repository.GetByIdAsync(groupId);
+            if (group == null) return false;
+
+            // Look up course by name to get the ID
+            var course = await _courseRepository.GetByNameAsync(groupDto.CourseName);
+            if (course == null)
+            {
+                throw new InvalidOperationException($"Course '{groupDto.CourseName}' not found. Please check the course name and try again.");
+            }
+
+            // Update with resolved course ID
+            group.CourseId = course.CourseId;
+            group.CreatorId = groupDto.CreatorId;
+            group.Topic = groupDto.Topic;
+            group.TimeSlot = groupDto.TimeSlot;
+            group.Description = groupDto.Description;
+            
+            return await _repository.UpdateAsync(group);
+        }
+
+        /// <summary>
+        /// Deletes a study group by its ID.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group to delete</param>
+        /// <returns>True if deleted successfully, false if not found</returns>
+        public async Task<bool> DeleteGroupAsync(int groupId)
+        {
+            return await _repository.DeleteAsync(groupId);
+        }
+    }
+}

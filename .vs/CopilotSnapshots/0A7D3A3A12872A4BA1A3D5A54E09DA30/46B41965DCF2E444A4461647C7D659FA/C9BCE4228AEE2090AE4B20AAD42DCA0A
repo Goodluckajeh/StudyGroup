@@ -1,0 +1,74 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IGroupMemberService, contains business logic for group members
+    public class GroupMemberService : IGroupMemberService
+    {
+        private readonly IGroupMemberRepository _repository;
+
+        // Injects the group member repository
+        public GroupMemberService(IGroupMemberRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps GroupMember to GroupMemberDto
+        private GroupMemberDto MapToDto(GroupMember member) => new GroupMemberDto
+        {
+            GroupMemberId = member.GroupMemberId,
+            GroupId = member.GroupId,
+            UserId = member.UserId,
+            StatusId = member.StatusId
+        };
+
+        // Gets all group members
+        public async Task<IEnumerable<GroupMemberDto>> GetAllGroupMembersAsync()
+        {
+            var members = await _repository.GetAllAsync();
+            return members.Select(MapToDto);
+        }
+
+        // Gets a group member by ID
+        public async Task<GroupMemberDto?> GetGroupMemberByIdAsync(int groupMemberId)
+        {
+            var member = await _repository.GetByIdAsync(groupMemberId);
+            return member == null ? null : MapToDto(member);
+        }
+
+        // Creates a new group member
+        public async Task<int> CreateGroupMemberAsync(CreateGroupMemberDto groupMemberDto)
+        {
+            var member = new GroupMember
+            {
+                GroupId = groupMemberDto.GroupId,
+                UserId = groupMemberDto.UserId,
+                StatusId = groupMemberDto.StatusId
+            };
+            return await _repository.CreateAsync(member);
+        }
+
+        // Updates an existing group member
+        public async Task<bool> UpdateGroupMemberAsync(int groupMemberId, UpdateGroupMemberDto groupMemberDto)
+        {
+            var member = await _repository.GetByIdAsync(groupMemberId);
+            if (member == null) return false;
+            member.GroupId = groupMemberDto.GroupId;
+            member.UserId = groupMemberDto.UserId;
+            member.StatusId = groupMemberDto.StatusId;
+            return await _repository.UpdateAsync(member);
+        }
+
+        // Deletes a group member by ID
+        public async Task<bool> DeleteGroupMemberAsync(int groupMemberId)
+        {
+            return await _repository.DeleteAsync(groupMemberId);
+        }
+    }
+}

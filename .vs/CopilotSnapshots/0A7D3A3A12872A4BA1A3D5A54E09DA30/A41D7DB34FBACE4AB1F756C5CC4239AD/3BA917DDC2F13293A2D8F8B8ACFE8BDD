@@ -1,0 +1,158 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Setup controller for initializing system data.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class SetupController : ControllerBase
+    {
+        private readonly IEntityTypeService _entityTypeService;
+        private readonly IMembershipStatusService _membershipStatusService;
+
+        public SetupController(IEntityTypeService entityTypeService, IMembershipStatusService membershipStatusService)
+        {
+            _entityTypeService = entityTypeService;
+            _membershipStatusService = membershipStatusService;
+        }
+
+        /// <summary>
+        /// POST: api/setup/entity-types
+        /// Creates the required entity types for the tagging system.
+        /// </summary>
+        [HttpPost("entity-types")]
+        public async Task<IActionResult> CreateEntityTypes()
+        {
+            try
+            {
+                var entityTypes = new[] { "User", "StudyGroup" };
+                var createdTypes = new List<string>();
+
+                foreach (var typeName in entityTypes)
+                {
+                    try
+                    {
+                        var createDto = new CreateEntityTypeDto { EntityTypeName = typeName };
+                        await _entityTypeService.CreateEntityTypeAsync(createDto);
+                        createdTypes.Add(typeName);
+                    }
+                    catch (Exception)
+                    {
+                        // Entity type might already exist
+                    }
+                }
+
+                return Ok(new
+                {
+                    Message = "Entity types setup completed",
+                    CreatedTypes = createdTypes,
+                    Note = "These entity types are required for the auto-tagging system to work"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to create entity types", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/setup/membership-statuses
+        /// Creates the required membership statuses.
+        /// </summary>
+        [HttpPost("membership-statuses")]
+        public async Task<IActionResult> CreateMembershipStatuses()
+        {
+            try
+            {
+                var statuses = new[] { "Pending", "Active", "Rejected", "Inactive" };
+                var createdStatuses = new List<string>();
+
+                foreach (var statusName in statuses)
+                {
+                    try
+                    {
+                        var createDto = new CreateMembershipStatusDto { StatusName = statusName };
+                        await _membershipStatusService.CreateStatusAsync(createDto);
+                        createdStatuses.Add(statusName);
+                    }
+                    catch (Exception)
+                    {
+                        // Status might already exist
+                    }
+                }
+
+                return Ok(new
+                {
+                    Message = "Membership statuses setup completed",
+                    CreatedStatuses = createdStatuses,
+                    Note = "These statuses are required for group membership management"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to create membership statuses", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/setup/all
+        /// Sets up all required system data.
+        /// </summary>
+        [HttpPost("all")]
+        public async Task<IActionResult> SetupAll()
+        {
+            try
+            {
+                // Create entity types
+                var entityTypes = new[] { "User", "StudyGroup" };
+                foreach (var typeName in entityTypes)
+                {
+                    try
+                    {
+                        var createDto = new CreateEntityTypeDto { EntityTypeName = typeName };
+                        await _entityTypeService.CreateEntityTypeAsync(createDto);
+                    }
+                    catch (Exception) { /* Might already exist */ }
+                }
+
+                // Create membership statuses
+                var statuses = new[] { "Pending", "Active", "Rejected", "Inactive" };
+                foreach (var statusName in statuses)
+                {
+                    try
+                    {
+                        var createDto = new CreateMembershipStatusDto { StatusName = statusName };
+                        await _membershipStatusService.CreateStatusAsync(createDto);
+                    }
+                    catch (Exception) { /* Might already exist */ }
+                }
+
+                return Ok(new
+                {
+                    Message = "✅ System setup completed successfully!",
+                    SetupItems = new
+                    {
+                        EntityTypes = entityTypes,
+                        MembershipStatuses = statuses
+                    },
+                    NextSteps = new[]
+                    {
+                        "1. Register users with skills - tags will be auto-created",
+                        "2. Create study groups - course tags will be auto-created", 
+                        "3. Use GET /api/users/{id}/matching-study-groups to find matches"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Setup failed", Details = ex.Message });
+            }
+        }
+    }
+}

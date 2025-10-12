@@ -1,0 +1,8 @@
+﻿namespace StudyGroup.Data.Models
+{
+    public class DayOfWeekEntity
+    {
+        public int day_id { get; set; }
+        public string day_name { get; set; } = string.Empty;
+    }
+}

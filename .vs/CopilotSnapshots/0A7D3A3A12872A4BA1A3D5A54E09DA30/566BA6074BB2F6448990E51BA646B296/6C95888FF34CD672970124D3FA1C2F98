@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.Models
+{
+    public class StudyGroup
+    {
+        public int group_id { get; set; }
+        public int course_id { get; set; }
+        public int creator_id { get; set; }
+        public string? topic { get; set; }
+        public string? time_slot { get; set; }
+        public string? description { get; set; }
+    }
+}

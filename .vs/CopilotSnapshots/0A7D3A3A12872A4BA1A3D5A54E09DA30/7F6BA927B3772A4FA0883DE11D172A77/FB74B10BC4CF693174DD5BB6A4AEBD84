@@ -1,0 +1,158 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for GroupMember endpoints with specialized membership management
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GroupMembersController : ControllerBase
+    {
+        private readonly IGroupMemberService _service;
+
+        // Injects the group member service
+        public GroupMembersController(IGroupMemberService service)
+        {
+            _service = service;
+        }
+
+        #region Basic CRUD Operations
+
+        // GET: api/groupmembers
+        // Returns all group members
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var members = await _service.GetAllGroupMembersAsync();
+            return Ok(members);
+        }
+
+        // GET: api/groupmembers/{id}
+        // Returns a group member by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var member = await _service.GetGroupMemberByIdAsync(id);
+            if (member == null) return NotFound();
+            return Ok(member);
+        }
+
+        // POST: api/groupmembers
+        // Creates a new group member
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateGroupMemberDto groupMemberDto)
+        {
+            var id = await _service.CreateGroupMemberAsync(groupMemberDto);
+            return CreatedAtAction(nameof(GetById), new { id }, groupMemberDto);
+        }
+
+        // PUT: api/groupmembers/{id}
+        // Updates an existing group member
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateGroupMemberDto groupMemberDto)
+        {
+            var success = await _service.UpdateGroupMemberAsync(id, groupMemberDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/groupmembers/{id}
+        // Removes a group member
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteGroupMemberAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        #endregion
+
+        #region Specialized Membership Management Endpoints
+
+        // GET: api/groupmembers/groups/{groupId}/members
+        // Returns all members of a specific group
+        [HttpGet("groups/{groupId}/members")]
+        public async Task<IActionResult> GetGroupMembers(int groupId)
+        {
+            var members = await _service.GetGroupMembersAsync(groupId);
+            return Ok(members);
+        }
+
+        // GET: api/groupmembers/users/{userId}/groups
+        // Returns all groups for a specific user
+        [HttpGet("users/{userId}/groups")]
+        public async Task<IActionResult> GetUserGroups(int userId)
+        {
+            var groups = await _service.GetUserGroupsAsync(userId);
+            return Ok(groups);
+        }
+
+        // GET: api/groupmembers/groups/{groupId}/members/pending
+        // Returns pending membership requests for a group
+        [HttpGet("groups/{groupId}/members/pending")]
+        public async Task<IActionResult> GetPendingMembers(int groupId)
+        {
+            var pendingMembers = await _service.GetPendingMembersAsync(groupId);
+            return Ok(pendingMembers);
+        }
+
+        // GET: api/groupmembers/groups/{groupId}/members/active
+        // Returns active members of a group
+        [HttpGet("groups/{groupId}/members/active")]
+        public async Task<IActionResult> GetActiveMembers(int groupId)
+        {
+            var activeMembers = await _service.GetActiveMembersAsync(groupId);
+            return Ok(activeMembers);
+        }
+
+        // POST: api/groupmembers/groups/{groupId}/join
+        // User requests to join a group
+        [HttpPost("groups/{groupId}/join")]
+        public async Task<IActionResult> JoinGroup(int groupId, [FromBody] JoinGroupDto joinDto)
+        {
+            try
+            {
+                var membershipId = await _service.JoinGroupAsync(groupId, joinDto.UserId);
+                return Ok(new { MembershipId = membershipId, Message = "Join request submitted successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        // PUT: api/groupmembers/{id}/approve
+        // Approve a pending membership request
+        [HttpPut("{id}/approve")]
+        public async Task<IActionResult> ApproveMembership(int id)
+        {
+            var success = await _service.ApproveMembershipAsync(id);
+            if (!success) return NotFound("Membership not found or not in pending status");
+            return Ok(new { Message = "Membership approved successfully" });
+        }
+
+        // PUT: api/groupmembers/{id}/reject
+        // Reject a pending membership request
+        [HttpPut("{id}/reject")]
+        public async Task<IActionResult> RejectMembership(int id)
+        {
+            var success = await _service.RejectMembershipAsync(id);
+            if (!success) return NotFound("Membership not found or not in pending status");
+            return Ok(new { Message = "Membership rejected successfully" });
+        }
+
+        // DELETE: api/groupmembers/{id}/remove
+        // Remove a user from a group (alternative to DELETE with clear intent)
+        [HttpDelete("{id}/remove")]
+        public async Task<IActionResult> RemoveFromGroup(int id)
+        {
+            var success = await _service.RemoveFromGroupAsync(id);
+            if (!success) return NotFound();
+            return Ok(new { Message = "User removed from group successfully" });
+        }
+
+        #endregion
+    }
+}

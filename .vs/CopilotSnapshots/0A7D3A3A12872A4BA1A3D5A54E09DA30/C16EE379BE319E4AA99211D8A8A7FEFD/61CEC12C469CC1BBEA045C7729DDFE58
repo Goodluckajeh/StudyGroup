@@ -1,0 +1,236 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+using BCrypt.Net;
+using System.Security.Cryptography;
+
+namespace StudyGroup.Service.Services
+{
+    /// <summary>
+    /// Implements IUserService, contains business logic for users.
+    /// Handles password hashing using BCrypt and email verification for secure registration.
+    /// </summary>
+    public class UserService : IUserService
+    {
+        private readonly IUserRepository _repository;
+
+        /// <summary>
+        /// Initializes a new instance of the UserService.
+        /// </summary>
+        /// <param name="repository">The user repository for data access</param>
+        public UserService(IUserRepository repository)
+        {
+            _repository = repository;
+        }
+
+        /// <summary>
+        /// Maps User model (PascalCase) to UserDto (PascalCase).
+        /// Excludes sensitive password hash and email verification tokens from the response.
+        /// </summary>
+        /// <param name="user">The user model from database</param>
+        /// <returns>DTO representation without sensitive data</returns>
+        private UserDto MapToDto(User user) => new UserDto
+        {
+            UserId = user.UserId,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Skills = user.Skills,
+            Visibility = user.Visibility,
+            Bio = user.Bio
+        };
+
+        /// <summary>
+        /// Generates a secure random token for email verification.
+        /// </summary>
+        /// <returns>A cryptographically secure random token</returns>
+        private string GenerateVerificationToken()
+        {
+            using var rng = RandomNumberGenerator.Create();
+            var bytes = new byte[32];
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "");
+        }
+
+        /// <summary>
+        /// Retrieves all users from the system.
+        /// Password hashes and verification tokens are excluded from the response for security.
+        /// </summary>
+        /// <returns>All users without sensitive password data</returns>
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        {
+            var users = await _repository.GetAllAsync();
+            return users.Select(MapToDto);
+        }
+
+        /// <summary>
+        /// Gets a specific user by their ID.
+        /// Password hash and verification tokens are excluded from the response for security.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user</param>
+        /// <returns>The user without sensitive password data if found, null otherwise</returns>
+        public async Task<UserDto?> GetUserByIdAsync(int userId)
+        {
+            var user = await _repository.GetByIdAsync(userId);
+            return user == null ? null : MapToDto(user);
+        }
+
+        /// <summary>
+        /// Creates a new user with a securely hashed password and generates email verification token.
+        /// The user account will be inactive until email is verified.
+        /// </summary>
+        /// <param name="userDto">The user data including plain text password</param>
+        /// <returns>The ID of the created user</returns>
+        public async Task<int> CreateUserAsync(CreateUserDto userDto)
+        {
+            // Check if email already exists
+            var existingUser = await _repository.GetByEmailAsync(userDto.Email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("An account with this email address already exists");
+            }
+
+            // Hash the password using BCrypt with automatic salt generation
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            
+            // Generate email verification token
+            var verificationToken = GenerateVerificationToken();
+            var tokenExpires = DateTime.UtcNow.AddHours(24); // Token expires in 24 hours
+
+            var user = new User
+            {
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                Email = userDto.Email,
+                PasswordHash = hashedPassword,
+                Skills = userDto.Skills,
+                Visibility = userDto.Visibility,
+                Bio = userDto.Bio,
+                IsEmailVerified = false, // Email not verified yet
+                EmailVerificationToken = verificationToken,
+                EmailVerificationTokenExpires = tokenExpires
+            };
+            
+            return await _repository.CreateAsync(user);
+        }
+
+        /// <summary>
+        /// Updates an existing user's information.
+        /// Note: This method does not update passwords or email verification status.
+        /// </summary>
+        /// <param name="userId">The ID of the user to update</param>
+        /// <param name="userDto">The updated user data (excluding password)</param>
+        /// <returns>True if updated successfully, false if user not found</returns>
+        public async Task<bool> UpdateUserAsync(int userId, UpdateUserDto userDto)
+        {
+            var user = await _repository.GetByIdAsync(userId);
+            if (user == null) return false;
+            
+            // Update user information (password hash and verification status remain unchanged)
+            user.FirstName = userDto.FirstName;
+            user.LastName = userDto.LastName;
+            user.Skills = userDto.Skills;
+            user.Visibility = userDto.Visibility;
+            user.Bio = userDto.Bio;
+            
+            return await _repository.UpdateAsync(user);
+        }
+
+        /// <summary>
+        /// Deletes a user by their ID.
+        /// This will also cascade delete related group memberships.
+        /// </summary>
+        /// <param name="userId">The ID of the user to delete</param>
+        /// <returns>True if deleted successfully, false if user not found</returns>
+        public async Task<bool> DeleteUserAsync(int userId)
+        {
+            return await _repository.DeleteAsync(userId);
+        }
+
+        /// <summary>
+        /// Verifies a user's password against the stored hash.
+        /// Also checks if the user's email has been verified.
+        /// This method can be used for authentication/login purposes.
+        /// </summary>
+        /// <param name="email">The user's email address</param>
+        /// <param name="password">The plain text password to verify</param>
+        /// <returns>The user DTO if password is correct and email is verified, null otherwise</returns>
+        public async Task<UserDto?> VerifyPasswordAsync(string email, string password)
+        {
+            var user = await _repository.GetByEmailAsync(email);
+            if (user == null) return null;
+
+            // Check if email is verified
+            if (!user.IsEmailVerified)
+            {
+                throw new InvalidOperationException("Please verify your email address before logging in. Check your inbox for the verification email.");
+            }
+
+            // Verify the password using BCrypt
+            var isPasswordValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            
+            return isPasswordValid ? MapToDto(user) : null;
+        }
+
+        /// <summary>
+        /// Changes a user's password.
+        /// Verifies the current password before setting the new one.
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <param name="currentPassword">The user's current password</param>
+        /// <param name="newPassword">The new password to set</param>
+        /// <returns>True if password changed successfully, false if current password is incorrect or user not found</returns>
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            var user = await _repository.GetByIdAsync(userId);
+            if (user == null) return false;
+
+            // Verify current password
+            var isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash);
+            if (!isCurrentPasswordValid) return false;
+
+            // Hash the new password and update
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            return await _repository.UpdateAsync(user);
+        }
+
+        /// <summary>
+        /// Verifies a user's email address using their verification token.
+        /// Activates the user account upon successful verification.
+        /// </summary>
+        /// <param name="verificationToken">The email verification token</param>
+        /// <returns>True if verification was successful, false otherwise</returns>
+        public async Task<bool> VerifyEmailAsync(string verificationToken)
+        {
+            return await _repository.VerifyEmailAsync(verificationToken);
+        }
+
+        /// <summary>
+        /// Resends the email verification email to a user.
+        /// Generates a new verification token and extends the expiration time.
+        /// </summary>
+        /// <param name="email">The user's email address</param>
+        /// <returns>True if the verification email was resent successfully, false otherwise</returns>
+        public async Task<bool> ResendVerificationEmailAsync(string email)
+        {
+            var user = await _repository.GetByEmailAsync(email);
+            if (user == null) return false;
+
+            // Don't resend if already verified
+            if (user.IsEmailVerified) 
+            {
+                throw new InvalidOperationException("Email address is already verified");
+            }
+
+            // Generate new verification token
+            user.EmailVerificationToken = GenerateVerificationToken();
+            user.EmailVerificationTokenExpires = DateTime.UtcNow.AddHours(24);
+
+            return await _repository.UpdateAsync(user);
+        }
+    }
+}

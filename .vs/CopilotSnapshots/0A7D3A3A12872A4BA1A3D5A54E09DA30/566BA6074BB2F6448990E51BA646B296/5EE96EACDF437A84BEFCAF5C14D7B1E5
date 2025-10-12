@@ -1,0 +1,11 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    public static class UserSql
+    {
+        public const string GetAll = @"SELECT * FROM users";
+        public const string GetById = @"SELECT * FROM users WHERE UserId = @UserId";
+        public const string Insert = @"INSERT INTO users (FirstName, LastName, Email, PasswordHash, Skills, Visibility, Bio) VALUES (@FirstName, @LastName, @Email, @PasswordHash, @Skills, @Visibility, @Bio); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, PasswordHash = @PasswordHash, Skills = @Skills, Visibility = @Visibility, Bio = @Bio WHERE UserId = @UserId";
+        public const string Delete = @"DELETE FROM users WHERE UserId = @UserId";
+    }
+}

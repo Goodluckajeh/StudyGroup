@@ -1,0 +1,15 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Data.Interfaces
+{
+    public interface IStudyGroupRepository
+    {
+        Task<IEnumerable<StudyGroup>> GetAllAsync();
+        Task<StudyGroup?> GetByIdAsync(int groupId);
+        Task<int> CreateAsync(StudyGroup group);
+        Task<bool> UpdateAsync(StudyGroup group);
+        Task<bool> DeleteAsync(int groupId);
+    }
+}

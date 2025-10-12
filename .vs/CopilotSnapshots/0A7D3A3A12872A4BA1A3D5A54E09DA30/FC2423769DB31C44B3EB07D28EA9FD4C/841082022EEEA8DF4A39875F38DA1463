@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    // Contains SQL queries for DayOfWeek entity CRUD operations
+    public static class DayOfWeekSql
+    {
+        public const string GetAll = @"SELECT * FROM days_of_week";
+        public const string GetById = @"SELECT * FROM days_of_week WHERE DayId = @DayId";
+        public const string Insert = @"INSERT INTO days_of_week (DayName) VALUES (@DayName); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE days_of_week SET DayName = @DayName WHERE DayId = @DayId";
+        public const string Delete = @"DELETE FROM days_of_week WHERE DayId = @DayId";
+    }
+}

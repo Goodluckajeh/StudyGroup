@@ -1,0 +1,187 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Api.Services;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for StudyGroup endpoints with automatic course tag generation.
+    /// Allows users to create study groups using course names and automatically creates relevant tags.
+    /// Requires JWT authentication for all endpoints.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints
+    public class StudyGroupsController : ControllerBase
+    {
+        private readonly IStudyGroupService _service;
+        private readonly AutoTaggingService _autoTaggingService;
+
+        /// <summary>
+        /// Initializes a new instance of the StudyGroupsController.
+        /// </summary>
+        /// <param name="service">The study group service for handling business logic</param>
+        /// <param name="autoTaggingService">The auto-tagging service for course tag management</param>
+        public StudyGroupsController(IStudyGroupService service, AutoTaggingService autoTaggingService)
+        {
+            _service = service;
+            _autoTaggingService = autoTaggingService;
+        }
+
+        /// <summary>
+        /// GET: api/studygroups
+        /// Retrieves all study groups with course names included for display.
+        /// </summary>
+        /// <returns>List of all study groups with their associated course information</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var groups = await _service.GetAllGroupsAsync();
+            return Ok(groups);
+        }
+
+        /// <summary>
+        /// GET: api/studygroups/{id}
+        /// Retrieves a specific study group by ID with course name included.
+        /// </summary>
+        /// <param name="id">The unique identifier of the study group</param>
+        /// <returns>The study group details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var group = await _service.GetGroupByIdAsync(id);
+            if (group == null) return NotFound();
+            return Ok(group);
+        }
+
+        /// <summary>
+        /// POST: api/studygroups
+        /// Creates a new study group using course name and automatically generates intelligent course tags.
+        /// This makes study groups discoverable by users with related skills.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "courseName": "Introduction to Psychology",
+        ///   "creatorId": 123,
+        ///   "topic": "Midterm Exam Preparation",
+        ///   "timeSlot": "Tuesdays 6-8 PM",
+        ///   "description": "Study group for Psychology 101 midterm..."
+        /// }
+        /// </summary>
+        /// <param name="groupDto">The study group data with course name</param>
+        /// <returns>The created study group with tag creation summary</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateStudyGroupDto groupDto)
+        {
+            try
+            {
+                // Create the study group first
+                var groupId = await _service.CreateGroupAsync(groupDto);
+                
+                // Automatically create course-related tags
+                var tagsCreated = await _autoTaggingService.CreateStudyGroupCourseTagsAsync(groupId, groupDto.CourseName);
+                
+                return CreatedAtAction(nameof(GetById), new { id = groupId }, new 
+                { 
+                    GroupId = groupId, 
+                    Message = "✅ Study group created successfully with automatic course tag generation!",
+                    TaggingInfo = new
+                    {
+                        CourseTagsCreated = tagsCreated,
+                        CourseName = groupDto.CourseName,
+                        Note = tagsCreated > 0 ? 
+                            "Course tags created automatically - users with matching skills can now find your study group!" :
+                            "Course name not recognized - consider adding more descriptive course information"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle course not found errors with user-friendly messages
+                return BadRequest(new { Error = ex.Message, Suggestion = "Please check the course name and ensure it exists in the system" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to create study group", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/studygroups/{id}
+        /// Updates an existing study group and automatically refreshes course tags.
+        /// If the course name changes, old tags are removed and new ones are created.
+        /// </summary>
+        /// <param name="id">The ID of the study group to update</param>
+        /// <param name="groupDto">The updated study group data with course name</param>
+        /// <returns>Success message with tag update summary</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateStudyGroupDto groupDto)
+        {
+            try
+            {
+                // Update the study group
+                var success = await _service.UpdateGroupAsync(id, groupDto);
+                if (!success) return NotFound("Study group not found");
+
+                // Automatically update course tags (removes old ones, creates new ones)
+                var tagsCreated = await _autoTaggingService.UpdateStudyGroupCourseTagsAsync(id, groupDto.CourseName);
+
+                return Ok(new
+                {
+                    Message = "✅ Study group updated successfully with automatic course tag refresh!",
+                    TaggingInfo = new
+                    {
+                        CourseTagsCreated = tagsCreated,
+                        UpdatedCourseName = groupDto.CourseName,
+                        Note = tagsCreated > 0 ? 
+                            "Course tags have been updated - users can now find your study group based on the new course information!" :
+                            "Course tags cleared - update course name to make your group discoverable"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle course not found errors with user-friendly messages
+                return BadRequest(new { Error = ex.Message, Suggestion = "Please check the course name and ensure it exists in the system" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to update study group", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/studygroups/{id}
+        /// Deletes a study group by its ID.
+        /// This will also automatically remove all associated course tags and group memberships.
+        /// Note: Due to CASCADE DELETE, all group memberships are automatically removed.
+        /// </summary>
+        /// <param name="id">The ID of the study group to delete</param>
+        /// <returns>Success message confirming deletion and cleanup</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                // Clean up course tags before deleting study group
+                await _autoTaggingService.RemoveStudyGroupCourseTagsAsync(id);
+
+                // Delete the study group
+                var success = await _service.DeleteGroupAsync(id);
+                if (!success) return NotFound();
+                
+                return Ok(new 
+                { 
+                    Message = "✅ Study group deleted successfully!",
+                    Note = "All associated course tags and group memberships have been automatically removed."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to delete study group", Details = ex.Message });
+            }
+        }
+    }
+}

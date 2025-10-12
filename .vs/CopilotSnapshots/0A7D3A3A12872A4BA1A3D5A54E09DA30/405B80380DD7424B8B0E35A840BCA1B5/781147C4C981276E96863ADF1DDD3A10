@@ -1,0 +1,338 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Api.Services.Interfaces;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for GroupMember endpoints with specialized membership management.
+    /// Handles both basic CRUD operations and advanced membership workflows like join requests,
+    /// approvals, rejections, and member filtering by status.
+    /// Uses centralized AuthService for secure access control.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints by default
+    public class GroupMembersController : ControllerBase
+    {
+        private readonly IGroupMemberService _service;
+        private readonly IStudyGroupService _studyGroupService;
+        private readonly IAuthService _authService;
+
+        /// <summary>
+        /// Initializes a new instance of the GroupMembersController.
+        /// </summary>
+        /// <param name="service">The group member service for handling business logic</param>
+        /// <param name="studyGroupService">The study group service for authorization checks</param>
+        /// <param name="authService">The authentication service for JWT operations</param>
+        public GroupMembersController(IGroupMemberService service, IStudyGroupService studyGroupService, IAuthService authService)
+        {
+            _service = service;
+            _studyGroupService = studyGroupService;
+            _authService = authService;
+        }
+
+        /// <summary>
+        /// Checks if the current user is authorized to manage a specific group's memberships.
+        /// </summary>
+        /// <param name="groupId">The ID of the group to check</param>
+        /// <returns>True if the user is the group creator, false otherwise</returns>
+        private async Task<bool> IsGroupCreatorAsync(int groupId)
+        {
+            var currentUserId = _authService.GetUserIdFromClaims(User);
+            if (currentUserId == null) return false;
+
+            var creatorId = await _studyGroupService.GetGroupCreatorIdAsync(groupId);
+            return creatorId == currentUserId;
+        }
+
+        #region Basic CRUD Operations
+
+        /// <summary>
+        /// GET: api/groupmembers
+        /// Retrieves all group memberships in the system.
+        /// This endpoint is mainly for administrative purposes.
+        /// AUTHORIZATION: Requires JWT authentication.
+        /// </summary>
+        /// <returns>List of all group memberships with their status information</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var members = await _service.GetAllGroupMembersAsync();
+            return Ok(members);
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/{id}
+        /// Retrieves a specific group membership by its unique ID.
+        /// AUTHORIZATION: Requires JWT authentication.
+        /// </summary>
+        /// <param name="id">The unique identifier of the group membership</param>
+        /// <returns>The group membership details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var member = await _service.GetGroupMemberByIdAsync(id);
+            if (member == null) return NotFound();
+            return Ok(member);
+        }
+
+        /// <summary>
+        /// POST: api/groupmembers
+        /// Creates a new group membership directly (administrative function).
+        /// For regular users joining groups, use the specialized join endpoint instead.
+        /// AUTHORIZATION: Requires JWT authentication.
+        /// </summary>
+        /// <param name="groupMemberDto">The group membership data including GroupId, UserId, and StatusId</param>
+        /// <returns>The created membership with its new ID</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateGroupMemberDto groupMemberDto)
+        {
+            var id = await _service.CreateGroupMemberAsync(groupMemberDto);
+            return CreatedAtAction(nameof(GetById), new { id }, groupMemberDto);
+        }
+
+        /// <summary>
+        /// PUT: api/groupmembers/{id}
+        /// Updates an existing group membership (administrative function).
+        /// For approval/rejection workflows, use the specialized endpoints instead.
+        /// AUTHORIZATION: Requires JWT authentication.
+        /// </summary>
+        /// <param name="id">The ID of the membership to update</param>
+        /// <param name="groupMemberDto">The updated membership data</param>
+        /// <returns>NoContent if successful, NotFound if membership doesn't exist</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateGroupMemberDto groupMemberDto)
+        {
+            var success = await _service.UpdateGroupMemberAsync(id, groupMemberDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE: api/groupmembers/{id}
+        /// Removes a group membership completely from the system.
+        /// This is a hard delete - consider using the 'remove' endpoint for better tracking.
+        /// AUTHORIZATION: Requires JWT authentication.
+        /// </summary>
+        /// <param name="id">The ID of the membership to delete</param>
+        /// <returns>NoContent if successful, NotFound if membership doesn't exist</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteGroupMemberAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        #endregion
+
+        #region Specialized Membership Management Endpoints
+
+        /// <summary>
+        /// GET: api/groupmembers/groups/{groupId}/members
+        /// Retrieves all members of a specific study group regardless of status.
+        /// RESTRICTED: Only group creators can see all members (including pending/rejected).
+        /// Regular users can only see active members via the /active endpoint.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group</param>
+        /// <returns>List of all memberships for the specified group</returns>
+        [HttpGet("groups/{groupId}/members")]
+        public async Task<IActionResult> GetGroupMembers(int groupId)
+        {
+            // Authorization: Only group creators can see all member statuses
+            if (!await IsGroupCreatorAsync(groupId))
+            {
+                return Forbid("Only the group creator can view all group members. Use /active endpoint to see active members.");
+            }
+
+            var members = await _service.GetGroupMembersAsync(groupId);
+            return Ok(members);
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/users/{userId}/groups
+        /// Retrieves all study groups that a specific user is associated with.
+        /// RESTRICTED: Users can only access their own group memberships.
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <returns>List of all group memberships for the specified user</returns>
+        [HttpGet("users/{userId}/groups")]
+        public async Task<IActionResult> GetUserGroups(int userId)
+        {
+            // Authorization: Users can only access their own group memberships
+            if (!_authService.CanAccessUserData(User, userId))
+            {
+                return Forbid("You can only access your own group memberships.");
+            }
+
+            var groups = await _service.GetUserGroupsAsync(userId);
+            return Ok(groups);
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/groups/{groupId}/members/pending
+        /// Retrieves all pending membership requests for a specific group.
+        /// RESTRICTED: Only group creators can see pending requests.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group</param>
+        /// <returns>List of users awaiting approval to join the group</returns>
+        [HttpGet("groups/{groupId}/members/pending")]
+        public async Task<IActionResult> GetPendingMembers(int groupId)
+        {
+            // Authorization: Only group creators can see pending requests
+            if (!await IsGroupCreatorAsync(groupId))
+            {
+                return Forbid("Only the group creator can view pending membership requests.");
+            }
+
+            var pendingMembers = await _service.GetPendingMembersAsync(groupId);
+            return Ok(pendingMembers);
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/groups/{groupId}/members/active
+        /// Retrieves only the active (approved) members of a specific group.
+        /// PUBLIC: Anyone can see who the active members are (no authentication required).
+        /// </summary>
+        /// <param name="groupId">The ID of the study group</param>
+        /// <returns>List of active/approved members in the group</returns>
+        [HttpGet("groups/{groupId}/members/active")]
+        [AllowAnonymous] // Override the controller-level [Authorize] for this public endpoint
+        public async Task<IActionResult> GetActiveMembers(int groupId)
+        {
+            // Public endpoint - anyone can see active members
+            var activeMembers = await _service.GetActiveMembersAsync(groupId);
+            return Ok(activeMembers);
+        }
+
+        /// <summary>
+        /// POST: api/groupmembers/groups/{groupId}/join
+        /// Allows a user to request to join a study group.
+        /// Creates a membership with "Pending" status that requires approval.
+        /// Prevents duplicate membership requests for the same user/group combination.
+        /// AUTHORIZATION: Authenticated users can request to join groups for themselves.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group to join</param>
+        /// <param name="joinDto">Contains the UserId of the user requesting to join</param>
+        /// <returns>Success message with membership ID, or error if user already has membership</returns>
+        [HttpPost("groups/{groupId}/join")]
+        public async Task<IActionResult> JoinGroup(int groupId, [FromBody] JoinGroupDto joinDto)
+        {
+            // Security: Verify the user is trying to join for themselves
+            if (!_authService.CanAccessUserData(User, joinDto.UserId))
+            {
+                return Forbid("You can only join groups for yourself.");
+            }
+
+            try
+            {
+                var membershipId = await _service.JoinGroupAsync(groupId, joinDto.UserId);
+                return Ok(new { MembershipId = membershipId, Message = "Join request submitted successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle cases where user is already a member or other business rule violations
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/groupmembers/{id}/approve
+        /// Approves a pending membership request, changing status from "Pending" to "Active".
+        /// RESTRICTED: Only the group creator can approve membership requests.
+        /// </summary>
+        /// <param name="id">The ID of the membership to approve</param>
+        /// <returns>Success message if approved, NotFound if membership doesn't exist or isn't pending</returns>
+        [HttpPut("{id}/approve")]
+        public async Task<IActionResult> ApproveMembership(int id)
+        {
+            // Get the membership to find which group it belongs to
+            var membership = await _service.GetGroupMemberByIdAsync(id);
+            if (membership == null)
+            {
+                return NotFound("Membership not found");
+            }
+
+            // Authorization: Only group creators can approve memberships
+            if (!await IsGroupCreatorAsync(membership.GroupId))
+            {
+                return Forbid("Only the group creator can approve membership requests.");
+            }
+
+            var success = await _service.ApproveMembershipAsync(id);
+            if (!success) 
+                return NotFound("Membership not found or not in pending status");
+            
+            return Ok(new { Message = "Membership approved successfully" });
+        }
+
+        /// <summary>
+        /// PUT: api/groupmembers/{id}/reject
+        /// Rejects a pending membership request, changing status from "Pending" to "Rejected".
+        /// RESTRICTED: Only the group creator can reject membership requests.
+        /// </summary>
+        /// <param name="id">The ID of the membership to reject</param>
+        /// <returns>Success message if rejected, NotFound if membership doesn't exist or isn't pending</returns>
+        [HttpPut("{id}/reject")]
+        public async Task<IActionResult> RejectMembership(int id)
+        {
+            // Get the membership to find which group it belongs to
+            var membership = await _service.GetGroupMemberByIdAsync(id);
+            if (membership == null)
+            {
+                return NotFound("Membership not found");
+            }
+
+            // Authorization: Only group creators can reject memberships
+            if (!await IsGroupCreatorAsync(membership.GroupId))
+            {
+                return Forbid("Only the group creator can reject membership requests.");
+            }
+
+            var success = await _service.RejectMembershipAsync(id);
+            if (!success) 
+                return NotFound("Membership not found or not in pending status");
+            
+            return Ok(new { Message = "Membership rejected successfully" });
+        }
+
+        /// <summary>
+        /// DELETE: api/groupmembers/{id}/remove
+        /// Removes a user from a group by deleting their membership record.
+        /// RESTRICTED: Only group creators can remove members, OR users can remove themselves.
+        /// </summary>
+        /// <param name="id">The ID of the membership to remove</param>
+        /// <returns>Success message if removed, NotFound if membership doesn't exist</returns>
+        [HttpDelete("{id}/remove")]
+        public async Task<IActionResult> RemoveFromGroup(int id)
+        {
+            // Get the membership to check authorization
+            var membership = await _service.GetGroupMemberByIdAsync(id);
+            if (membership == null)
+            {
+                return NotFound("Membership not found");
+            }
+
+            var currentUserId = _authService.GetUserIdFromClaims(User);
+            var isGroupCreator = await IsGroupCreatorAsync(membership.GroupId);
+            var isSelfRemoval = currentUserId == membership.UserId;
+
+            // Authorization: Group creators can remove anyone, users can remove themselves
+            if (!isGroupCreator && !isSelfRemoval)
+            {
+                return Forbid("You can only remove yourself from a group, or be the group creator to remove others.");
+            }
+
+            var success = await _service.RemoveFromGroupAsync(id);
+            if (!success) return NotFound();
+            
+            var message = isSelfRemoval ? "You have left the group successfully" : "User removed from group successfully";
+            return Ok(new { Message = message });
+        }
+
+        #endregion
+    }
+}

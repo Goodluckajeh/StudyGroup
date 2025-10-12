@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements ICourseService, contains business logic for courses
+    public class CourseService : ICourseService
+    {
+        private readonly ICourseRepository _repository;
+
+        // Injects the course repository
+        public CourseService(ICourseRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Gets all courses
+        public async Task<IEnumerable<Course>> GetAllCoursesAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        // Gets a course by ID
+        public async Task<Course?> GetCourseByIdAsync(int courseId)
+        {
+            return await _repository.GetByIdAsync(courseId);
+        }
+
+        // Creates a new course
+        public async Task<int> CreateCourseAsync(Course course)
+        {
+            return await _repository.CreateAsync(course);
+        }
+
+        // Updates an existing course
+        public async Task<bool> UpdateCourseAsync(Course course)
+        {
+            return await _repository.UpdateAsync(course);
+        }
+
+        // Deletes a course by ID
+        public async Task<bool> DeleteCourseAsync(int courseId)
+        {
+            return await _repository.DeleteAsync(courseId);
+        }
+    }
+}

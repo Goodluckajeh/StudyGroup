@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "StudyGroup.Api": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:43960;http://localhost:43961"
+    }
+  }
+}

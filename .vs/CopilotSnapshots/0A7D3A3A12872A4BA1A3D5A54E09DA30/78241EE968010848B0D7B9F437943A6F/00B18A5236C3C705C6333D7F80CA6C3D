@@ -1,0 +1,69 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for DayOfWeek endpoints
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DaysOfWeekController : ControllerBase
+    {
+        private readonly IDayOfWeekService _service;
+
+        // Injects the day of week service
+        public DaysOfWeekController(IDayOfWeekService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/daysofweek
+        // Returns all days of week
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var days = await _service.GetAllDaysAsync();
+            return Ok(days);
+        }
+
+        // GET: api/daysofweek/{id}
+        // Returns a day of week by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var day = await _service.GetDayByIdAsync(id);
+            if (day == null) return NotFound();
+            return Ok(day);
+        }
+
+        // POST: api/daysofweek
+        // Creates a new day of week
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] DayOfWeek day)
+        {
+            var id = await _service.CreateDayAsync(day);
+            return CreatedAtAction(nameof(GetById), new { id }, day);
+        }
+
+        // PUT: api/daysofweek/{id}
+        // Updates an existing day of week
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] DayOfWeek day)
+        {
+            day.DayId = id;
+            var success = await _service.UpdateDayAsync(day);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/daysofweek/{id}
+        // Deletes a day of week by ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteDayAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

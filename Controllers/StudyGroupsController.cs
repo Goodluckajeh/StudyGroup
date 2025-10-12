@@ -1,0 +1,485 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Api.Services;
+using StudyGroup.Api.Authorization;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for StudyGroup endpoints with automatic course tag generation, instant joining discovery, and role-based authorization.
+    /// Creates and manages course tags automatically when study groups are created or updated.
+    /// Provides public discovery endpoints for unauthenticated users to browse available groups.
+    /// Implements creator-only authorization for group management operations.
+    /// Public endpoints allow anonymous browsing, authenticated endpoints for management.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class StudyGroupsController : ControllerBase
+    {
+        private readonly IStudyGroupService _service;
+        private readonly AutoTaggingService _autoTaggingService;
+        private readonly IGroupMemberService _groupMemberService;
+
+        /// <summary>
+        /// Initializes a new instance of the StudyGroupsController.
+        /// </summary>
+        /// <param name="service">The study group service for handling business logic</param>
+        /// <param name="autoTaggingService">The auto-tagging service for course tag management</param>
+        /// <param name="groupMemberService">The group member service for membership checks</param>
+        public StudyGroupsController(IStudyGroupService service, AutoTaggingService autoTaggingService, IGroupMemberService groupMemberService)
+        {
+            _service = service;
+            _autoTaggingService = autoTaggingService;
+            _groupMemberService = groupMemberService;
+        }
+
+        /// <summary>
+        /// Gets the current user ID from JWT claims.
+        /// </summary>
+        /// <returns>Current user ID or null if not found</returns>
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : null;
+        }
+
+        #region Public Discovery Endpoints (No Authentication Required)
+
+        /// <summary>
+        /// GET: api/studygroups
+        /// Retrieves all study groups with course names included for display.
+        /// PUBLIC ENDPOINT: No authentication required - allows browsing for discovery.
+        /// </summary>
+        /// <returns>List of all study groups with their associated course information</returns>
+        [HttpGet]
+        [AllowAnonymous] // ?? Public access for discovery
+        public async Task<IActionResult> GetAll()
+        {
+            var groups = await _service.GetAllGroupsAsync();
+            var groupList = groups.ToList();
+            
+            return Ok(new
+            {
+                Message = "?? All Study Groups (Public Discovery)",
+                TotalGroups = groupList.Count,
+                StudyGroups = groupList,
+                PublicAccess = new
+                {
+                    Note = "Anyone can browse study groups without authentication",
+                    NextSteps = new[]
+                    {
+                        "Create an account to join groups instantly",
+                        "Browse groups by specific course using /api/studygroups/by-course/{courseName}",
+                        "View detailed group information"
+                    }
+                },
+                AuthenticationInfo = new
+                {
+                    Required = false,
+                    Benefits = "Register and login to join groups, create your own groups, and manage memberships"
+                }
+            });
+        }
+
+        /// <summary>
+        /// GET: api/studygroups/{id}
+        /// Retrieves a specific study group by ID with course name included.
+        /// PUBLIC ENDPOINT: No authentication required - allows viewing group details.
+        /// </summary>
+        /// <param name="id">The unique identifier of the study group</param>
+        /// <returns>The study group details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        [AllowAnonymous] // ?? Public access for discovery
+        public async Task<IActionResult> GetById(int id)
+        {
+            var group = await _service.GetGroupByIdAsync(id);
+            if (group == null) return NotFound();
+            
+            return Ok(new
+            {
+                StudyGroup = group,
+                PublicAccess = new
+                {
+                    Note = "Group details are publicly viewable for discovery",
+                    JoinRequirement = "Authentication required to join this group"
+                },
+                NextSteps = new[]
+                {
+                    "Register an account to join this group",
+                    "Login if you already have an account",
+                    "Browse similar groups by course using /api/studygroups/by-course/{courseName}"
+                }
+            });
+        }
+
+        /// <summary>
+        /// GET: api/studygroups/by-course/{courseName}
+        /// Finds all study groups for a specific course with flexible matching.
+        /// PUBLIC ENDPOINT: No authentication required - allows course-specific discovery.
+        /// Supports both exact matches and partial searches (e.g., "psychology" matches "Introduction to Psychology").
+        /// </summary>
+        /// <param name="courseName">The exact or partial course name to search for</param>
+        /// <returns>List of study groups for the specified course</returns>
+        [HttpGet("by-course/{courseName}")]
+        [AllowAnonymous] // ?? Public access for discovery
+        public async Task<IActionResult> GetGroupsByCourse(string courseName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(courseName))
+                {
+                    return BadRequest(new { Error = "Course name is required" });
+                }
+
+                // Get all study groups
+                var allGroups = await _service.GetAllGroupsAsync();
+                
+                // Search in course name, topic, and description for comprehensive matching
+                var searchTerm = courseName.ToLowerInvariant();
+                var courseGroups = allGroups.Where(g =>
+                    g.CourseName.ToLowerInvariant().Contains(searchTerm) ||
+                    (g.Topic != null && g.Topic.ToLowerInvariant().Contains(searchTerm)) ||
+                    (g.Description != null && g.Description.ToLowerInvariant().Contains(searchTerm))
+                ).ToList();
+
+                return Ok(new
+                {
+                    Message = $"?? Study Groups for '{courseName}' (Public Discovery)",
+                    SearchTerm = courseName,
+                    TotalGroups = courseGroups.Count,
+                    Groups = courseGroups,
+                    PublicAccess = new
+                    {
+                        Note = "Course-specific groups are publicly browsable",
+                        JoiningProcess = "Register and login to join any of these groups instantly"
+                    },
+                    SearchTips = new[]
+                    {
+                        "Try broader terms like 'psychology' instead of 'Introduction to Psychology'",
+                        "Search by topic like 'exam prep' or 'homework help'",
+                        "Use course codes like 'CS101' or 'PSYC201'",
+                        "Partial matches work - 'math' finds 'Mathematics', 'Calculus', etc."
+                    },
+                    ActionTips = new
+                    {
+                        Discovery = "Browse all available groups for this course/topic",
+                        Registration = "Create an account to join groups",
+                        InstantJoining = "Once logged in, join any group immediately - no approval needed!"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to get groups by course", Details = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Authenticated User Operations
+
+        /// <summary>
+        /// POST: api/studygroups
+        /// Creates a new study group and AUTOMATICALLY generates intelligent course tags.
+        /// AUTHENTICATION REQUIRED: Only authenticated users can create groups.
+        /// The current user (from JWT token) becomes the creator and has management rights.
+        /// </summary>
+        /// <param name="groupDto">The study group data with course name</param>
+        /// <returns>The created study group with automatic tag creation summary</returns>
+        [HttpPost]
+        [Authorize] // ?? Authentication required for creation
+        public async Task<IActionResult> Create([FromBody] CreateStudyGroupDto groupDto)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId == null)
+                {
+                    return Unauthorized("Invalid token");
+                }
+
+                // Ensure the creator ID matches the current user (security measure)
+                if (groupDto.CreatorId != currentUserId.Value)
+                {
+                    return Forbid("You can only create study groups for yourself");
+                }
+
+                // Step 1: Create the study group first
+                var groupId = await _service.CreateGroupAsync(groupDto);
+                
+                // Step 2: AUTOMATICALLY create course-related tags (no duplicates)
+                var tagsCreated = 0;
+                if (!string.IsNullOrWhiteSpace(groupDto.CourseName))
+                {
+                    tagsCreated = await _autoTaggingService.CreateStudyGroupCourseTagsAsync(groupId, groupDto.CourseName);
+                }
+                
+                return CreatedAtAction(nameof(GetById), new { id = groupId }, new 
+                { 
+                    GroupId = groupId, 
+                    Message = "? Study group created successfully!",
+                    CreatorRights = new
+                    {
+                        YourRole = "Group Creator",
+                        Permissions = new[]
+                        {
+                            "? Update group details",
+                            "? Delete the group",
+                            "? Remove members from the group",
+                            "? Full management access"
+                        }
+                    },
+                    AutoTagging = new
+                    {
+                        CourseTagsCreated = tagsCreated,
+                        CourseName = groupDto.CourseName,
+                        Note = tagsCreated > 0 ? 
+                            $"??? {tagsCreated} course tags created automatically - users with matching skills can now find and instantly join your study group!" :
+                            "?? Course name not recognized - consider using more specific course information"
+                    },
+                    InstantJoining = new
+                    {
+                        Available = true,
+                        Note = "Users can now join your group instantly without needing approval!"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle course not found errors
+                return BadRequest(new { Error = ex.Message, Suggestion = "Please check the course name and ensure it exists in the system" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to create study group", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET: api/studygroups/available
+        /// Discovers all study groups that the current user can instantly join.
+        /// AUTHENTICATION REQUIRED: Requires login to show personalized available groups.
+        /// Excludes groups where the user is already a member.
+        /// </summary>
+        /// <returns>List of study groups available for instant joining</returns>
+        [HttpGet("available")]
+        [Authorize] // ?? Authentication required for personalized results
+        public async Task<IActionResult> GetAvailableGroups()
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId == null)
+                {
+                    return Unauthorized("Invalid token");
+                }
+
+                // Get all study groups
+                var allGroups = await _service.GetAllGroupsAsync();
+                
+                // Get groups where user is already a member
+                var userMemberships = await _groupMemberService.GetUserGroupsAsync(currentUserId.Value);
+                var userGroupIds = userMemberships.Where(m => m.StatusId == 2) // Only active memberships
+                                                  .Select(m => m.GroupId).ToHashSet();
+
+                // Filter out groups where user is already a member
+                var availableGroups = allGroups.Where(g => !userGroupIds.Contains(g.GroupId)).ToList();
+
+                // Add creator indication for user's own groups (they can manage but not join)
+                var groupsWithCreatorInfo = availableGroups.Select(g => new
+                {
+                    Group = g,
+                    IsYourGroup = g.CreatorId == currentUserId.Value,
+                    CreatorRights = g.CreatorId == currentUserId.Value ? "You can manage this group" : null
+                }).ToList();
+
+                return Ok(new
+                {
+                    Message = "?? Available Study Groups - Join Instantly!",
+                    TotalAvailable = availableGroups.Count,
+                    CurrentUserId = currentUserId,
+                    AvailableGroups = groupsWithCreatorInfo,
+                    InstantJoining = new
+                    {
+                        Enabled = true,
+                        JoinEndpoint = "POST /api/groupmembers",
+                        Process = "? Click to join ? Instantly become a member ? Start participating immediately!",
+                        NoWaiting = "No approval needed - join any group instantly!"
+                    },
+                    Instructions = new
+                    {
+                        JoinGroup = "Use POST /api/groupmembers with groupId, userId, and statusId=2 for instant membership",
+                        ViewMembers = "Use GET /api/groupmembers/groups/{groupId}/members to see current members",
+                        BrowseByCourse = "Use GET /api/studygroups/by-course/{courseName} to find course-specific groups",
+                        ManageYourGroups = "Groups you created can be managed with full creator rights"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to get available groups", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET: api/studygroups/my-groups
+        /// Gets all study groups created by the current user.
+        /// AUTHENTICATION REQUIRED: Shows groups where the user has full management rights.
+        /// </summary>
+        /// <returns>List of study groups created by the current user</returns>
+        [HttpGet("my-groups")]
+        [Authorize] // ?? Authentication required for personal dashboard
+        public async Task<IActionResult> GetMyGroups()
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId == null)
+                {
+                    return Unauthorized("Invalid token");
+                }
+
+                var allGroups = await _service.GetAllGroupsAsync();
+                var myGroups = allGroups.Where(g => g.CreatorId == currentUserId.Value).ToList();
+
+                // Get member counts for each group
+                var groupsWithMemberInfo = new List<object>();
+                foreach (var group in myGroups)
+                {
+                    var members = await _groupMemberService.GetActiveMembersAsync(group.GroupId);
+                    groupsWithMemberInfo.Add(new
+                    {
+                        Group = group,
+                        MemberCount = members.Count(),
+                        YourRole = "Creator",
+                        ManagementRights = new[]
+                        {
+                            "Update group details",
+                            "Delete group",
+                            "Remove members",
+                            "View all members"
+                        }
+                    });
+                }
+
+                return Ok(new
+                {
+                    Message = "?? Your Study Groups - Full Management Rights",
+                    TotalGroupsCreated = myGroups.Count,
+                    CreatorId = currentUserId.Value,
+                    YourGroups = groupsWithMemberInfo,
+                    ManagementOptions = new
+                    {
+                        UpdateGroup = "PUT /api/studygroups/{id}",
+                        DeleteGroup = "DELETE /api/studygroups/{id}",
+                        RemoveMember = "DELETE /api/groupmembers/{membershipId}/remove",
+                        ViewMembers = "GET /api/groupmembers/groups/{groupId}/members"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to get your groups", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/studygroups/{id}
+        /// Updates an existing study group and AUTOMATICALLY refreshes course tags.
+        /// AUTHORIZATION: Only the group creator can update the group.
+        /// </summary>
+        /// <param name="id">The ID of the study group to update</param>
+        /// <param name="groupDto">The updated study group data with course name</param>
+        /// <returns>Success message with automatic tag update summary</returns>
+        [HttpPut("{id}")]
+        [StudyGroupCreatorOnly] // ?? Only group creator can update
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateStudyGroupDto groupDto)
+        {
+            try
+            {
+                // Step 1: Update the study group
+                var success = await _service.UpdateGroupAsync(id, groupDto);
+                if (!success) return NotFound("Study group not found");
+
+                // Step 2: AUTOMATICALLY update course tags (removes old, creates new, no duplicates)
+                var tagsCreated = await _autoTaggingService.UpdateStudyGroupCourseTagsAsync(id, groupDto.CourseName);
+
+                return Ok(new
+                {
+                    Message = "? Study group updated successfully by creator!",
+                    Authorization = new
+                    {
+                        Action = "Update completed as group creator",
+                        YourRole = "Group Creator"
+                    },
+                    AutoTagging = new
+                    {
+                        CourseTagsRefreshed = true,
+                        NewCourseTagsCreated = tagsCreated,
+                        UpdatedCourseName = groupDto.CourseName,
+                        Note = tagsCreated > 0 ? 
+                            $"?? Course tags refreshed - {tagsCreated} new tags created based on updated course information!" :
+                            "?? Course tags cleared - update course name to make your group discoverable"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle course not found errors
+                return BadRequest(new { Error = ex.Message, Suggestion = "Please check the course name and ensure it exists in the system" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to update study group", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/studygroups/{id}
+        /// Deletes a study group by its ID.
+        /// AUTHORIZATION: Only the group creator can delete the group.
+        /// This will AUTOMATICALLY remove all associated course tags and group memberships.
+        /// </summary>
+        /// <param name="id">The ID of the study group to delete</param>
+        /// <returns>Success message confirming deletion and automatic cleanup</returns>
+        [HttpDelete("{id}")]
+        [StudyGroupCreatorOnly] // ?? Only group creator can delete
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                // Step 1: Clean up course tags before deleting study group
+                await _autoTaggingService.RemoveStudyGroupCourseTagsAsync(id);
+
+                // Step 2: Delete the study group (memberships cascade delete automatically)
+                var success = await _service.DeleteGroupAsync(id);
+                if (!success) return NotFound();
+                
+                return Ok(new 
+                { 
+                    Message = "? Study group deleted successfully by creator!",
+                    Authorization = new
+                    {
+                        Action = "Group deleted by creator",
+                        Note = "Only group creators can delete their groups"
+                    },
+                    AutoCleanup = new
+                    {
+                        CourseTagsRemoved = true,
+                        GroupMembershipsRemoved = true,
+                        Note = "All associated data has been automatically cleaned up"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to delete study group", Details = ex.Message });
+            }
+        }
+
+        #endregion
+    }
+}

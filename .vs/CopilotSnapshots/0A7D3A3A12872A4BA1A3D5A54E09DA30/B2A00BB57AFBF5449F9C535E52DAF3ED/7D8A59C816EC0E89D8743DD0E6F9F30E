@@ -1,0 +1,20 @@
+﻿{
+
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=DatabaseProject;Trusted_Connection=True;Encrypt=False;"
+  },
+
+  "Application": {
+    "Name": "StudyGroup API",
+    "Description": "Open API for StudyGroup management - no authentication required"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+
+}
