@@ -1,0 +1,33 @@
+namespace StudyGroup.Service.DTOs
+{
+    // DTO for returning group member data
+    public class GroupMemberDto
+    {
+        public int GroupMemberId { get; set; }
+        public int GroupId { get; set; }
+        public int UserId { get; set; }
+        public int StatusId { get; set; }
+    }
+
+    // DTO for creating a group member
+    public class CreateGroupMemberDto
+    {
+        public int GroupId { get; set; }
+        public int UserId { get; set; }
+        public int StatusId { get; set; }
+    }
+
+    // DTO for updating a group member
+    public class UpdateGroupMemberDto
+    {
+        public int GroupId { get; set; }
+        public int UserId { get; set; }
+        public int StatusId { get; set; }
+    }
+
+    // DTO for joining a group (simpler - no status needed as it defaults to pending)
+    public class JoinGroupDto
+    {
+        public int UserId { get; set; }
+    }
+}

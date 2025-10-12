@@ -1,0 +1,89 @@
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.SqlQueries;
+
+namespace StudyGroup.Data.Repositories
+{
+    /// <summary>
+    /// Implements IUserRepository using Dapper for data access.
+    /// </summary>
+    public class UserRepository : IUserRepository
+    {
+        private readonly IDbConnection _dbConnection;
+
+        /// <summary>
+        /// Initializes a new instance of the UserRepository.
+        /// </summary>
+        /// <param name="dbConnection">The database connection for data access</param>
+        public UserRepository(IDbConnection dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
+        /// <summary>
+        /// Gets all users from the database.
+        /// </summary>
+        /// <returns>Collection of all users</returns>
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _dbConnection.QueryAsync<User>(UserSql.GetAll);
+        }
+
+        /// <summary>
+        /// Gets a single user by their ID.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user</param>
+        /// <returns>The user if found, null otherwise</returns>
+        public async Task<User?> GetByIdAsync(int userId)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<User>(UserSql.GetById, new { UserId = userId });
+        }
+
+        /// <summary>
+        /// Gets a single user by their email address.
+        /// Used for login processes.
+        /// </summary>
+        /// <param name="email">The user's email address</param>
+        /// <returns>The user if found, null otherwise</returns>
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<User>(UserSql.GetByEmail, new { Email = email });
+        }
+
+        /// <summary>
+        /// Inserts a new user and returns their ID.
+        /// </summary>
+        /// <param name="user">The user to create</param>
+        /// <returns>The ID of the newly created user</returns>
+        public async Task<int> CreateAsync(User user)
+        {
+            return await _dbConnection.QuerySingleAsync<int>(UserSql.Insert, user);
+        }
+
+        /// <summary>
+        /// Updates an existing user.
+        /// </summary>
+        /// <param name="user">The user with updated information</param>
+        /// <returns>True if the update was successful, false otherwise</returns>
+        public async Task<bool> UpdateAsync(User user)
+        {
+            var affected = await _dbConnection.ExecuteAsync(UserSql.Update, user);
+            return affected > 0;
+        }
+
+        /// <summary>
+        /// Deletes a user by their ID.
+        /// </summary>
+        /// <param name="userId">The ID of the user to delete</param>
+        /// <returns>True if the deletion was successful, false otherwise</returns>
+        public async Task<bool> DeleteAsync(int userId)
+        {
+            var affected = await _dbConnection.ExecuteAsync(UserSql.Delete, new { UserId = userId });
+            return affected > 0;
+        }
+    }
+}

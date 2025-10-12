@@ -1,0 +1,6 @@
+C:\Professional software dev\DatabaseProject\bin\Debug\DatabaseProject.dacpac
+C:\Professional software dev\DatabaseProject\bin\Debug\DatabaseProject.dll
+C:\Professional software dev\DatabaseProject\bin\Debug\DatabaseProject.pdb
+C:\Professional software dev\DatabaseProject\obj\Debug\DatabaseProject.sqlproj.AssemblyReference.cache
+C:\Professional software dev\DatabaseProject\obj\Debug\DatabaseProject.dll
+C:\Professional software dev\DatabaseProject\obj\Debug\DatabaseProject.pdb

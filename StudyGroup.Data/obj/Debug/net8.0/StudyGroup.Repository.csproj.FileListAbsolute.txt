@@ -1,0 +1,12 @@
+C:\Professional software dev\StudyGroup.Data\bin\Debug\net8.0\StudyGroup.Repository.deps.json
+C:\Professional software dev\StudyGroup.Data\bin\Debug\net8.0\StudyGroup.Repository.dll
+C:\Professional software dev\StudyGroup.Data\bin\Debug\net8.0\StudyGroup.Repository.pdb
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.csproj.AssemblyReference.cache
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.GeneratedMSBuildEditorConfig.editorconfig
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.AssemblyInfoInputs.cache
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.AssemblyInfo.cs
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.csproj.CoreCompileInputs.cache
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.dll
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\refint\StudyGroup.Repository.dll
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\StudyGroup.Repository.pdb
+C:\Professional software dev\StudyGroup.Data\obj\Debug\net8.0\ref\StudyGroup.Repository.dll

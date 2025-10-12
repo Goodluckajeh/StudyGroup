@@ -1,0 +1,15 @@
+C:\Professional software dev\StudyGroup.Service\bin\Debug\net8.0\StudyGroup.Service.deps.json
+C:\Professional software dev\StudyGroup.Service\bin\Debug\net8.0\StudyGroup.Service.dll
+C:\Professional software dev\StudyGroup.Service\bin\Debug\net8.0\StudyGroup.Service.pdb
+C:\Professional software dev\StudyGroup.Service\bin\Debug\net8.0\StudyGroup.Repository.dll
+C:\Professional software dev\StudyGroup.Service\bin\Debug\net8.0\StudyGroup.Repository.pdb
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.csproj.AssemblyReference.cache
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.GeneratedMSBuildEditorConfig.editorconfig
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.AssemblyInfoInputs.cache
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.AssemblyInfo.cs
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.csproj.CoreCompileInputs.cache
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGro.F32E0255.Up2Date
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.dll
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\refint\StudyGroup.Service.dll
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\StudyGroup.Service.pdb
+C:\Professional software dev\StudyGroup.Service\obj\Debug\net8.0\ref\StudyGroup.Service.dll

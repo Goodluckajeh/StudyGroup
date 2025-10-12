@@ -1,0 +1,16 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Service.Interfaces
+{
+    // Interface for Course service, defines business logic methods
+    public interface ICourseService
+    {
+        Task<IEnumerable<CourseDto>> GetAllCoursesAsync();
+        Task<CourseDto?> GetCourseByIdAsync(int courseId);
+        Task<int> CreateCourseAsync(CreateCourseDto courseDto);
+        Task<bool> UpdateCourseAsync(int courseId, UpdateCourseDto courseDto);
+        Task<bool> DeleteCourseAsync(int courseId);
+    }
+}
