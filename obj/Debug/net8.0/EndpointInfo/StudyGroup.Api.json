@@ -601,47 +601,6 @@
         }
       }
     },
-    "/api/StudyGroups/available": {
-      "get": {
-        "tags": [
-          "StudyGroups"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/StudyGroups/search": {
-      "get": {
-        "tags": [
-          "StudyGroups"
-        ],
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "excludeUserGroups",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/StudyGroups/by-course/{courseName}": {
       "get": {
         "tags": [
@@ -656,6 +615,18 @@
               "type": "string"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/StudyGroups/available": {
+      "get": {
+        "tags": [
+          "StudyGroups"
         ],
         "responses": {
           "200": {

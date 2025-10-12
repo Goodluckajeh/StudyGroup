@@ -416,27 +416,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "StudyGroup.Api.Controllers.StudyGroupsController",
-    "Method": "SearchGroups",
-    "RelativePath": "api/StudyGroups/search",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "query",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "excludeUserGroups",
-        "Type": "System.Boolean",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "StudyGroup.Api.Controllers.TagsController",
     "Method": "GetAll",
     "RelativePath": "api/Tags",
