@@ -8,8 +8,10 @@ using System.Security.Claims;
 namespace StudyGroup.Api.Controllers
 {
     /// <summary>
-    /// API controller for User endpoints with JWT authentication and automatic skill tag management.
-    /// Creates and manages skill tags automatically when users are created or updated.
+    /// Simplified User API controller focused on essential user management functionality.
+    /// Provides endpoints for getting user info, updating profile, and changing password.
+    /// All operations require JWT authentication and enforce authorization (users can only modify their own data).
+    /// Includes comprehensive validation at both controller and service levels.
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
@@ -40,248 +42,16 @@ namespace StudyGroup.Api.Controllers
             return int.TryParse(userIdClaim, out int userId) ? userId : null;
         }
 
-        /// <summary>
-        /// GET: api/users
-        /// Retrieves all users from the system.
-        /// Password hashes are excluded from the response for security.
-        /// </summary>
-        /// <returns>List of all users without sensitive password data</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var users = await _service.GetAllUsersAsync();
-            return Ok(users);
-        }
-
-        /// <summary>
-        /// GET: api/users/{id}
-        /// Retrieves a specific user by their ID.
-        /// Password hash is excluded from the response for security.
-        /// </summary>
-        /// <param name="id">The unique identifier of the user</param>
-        /// <returns>The user details without sensitive data if found, otherwise NotFound</returns>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var user = await _service.GetUserByIdAsync(id);
-            if (user == null) return NotFound();
-            return Ok(user);
-        }
-
-        /// <summary>
-        /// POST: api/users
-        /// Creates a new user and AUTOMATICALLY creates skill tags based on their skills.
-        /// No need for separate tag creation - this is handled seamlessly.
-        /// 
-        /// Example request body:
-        /// {
-        ///   "firstName": "John",
-        ///   "lastName": "Doe", 
-        ///   "email": "john.doe@example.com",
-        ///   "password": "SecurePassword123!",
-        ///   "skills": "JavaScript, C#, React, Problem Solving",
-        ///   "visibility": true,
-        ///   "bio": "Computer Science student"
-        /// }
-        /// </summary>
-        /// <param name="userDto">The user data including plain text password</param>
-        /// <returns>The created user details with automatic tag creation summary</returns>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateUserDto userDto)
-        {
-            try
-            {
-                // Step 1: Create the user first
-                var userId = await _service.CreateUserAsync(userDto);
-                
-                // Step 2: AUTOMATICALLY create skill tags (no duplicates)
-                var tagsCreated = 0;
-                if (!string.IsNullOrWhiteSpace(userDto.Skills))
-                {
-                    tagsCreated = await _autoTaggingService.CreateUserSkillTagsAsync(userId, userDto.Skills);
-                }
-                
-                // Step 3: Get the created user for response
-                var createdUser = await _service.GetUserByIdAsync(userId);
-                if (createdUser == null)
-                {
-                    return BadRequest(new { Error = "Failed to retrieve created user" });
-                }
-
-                // Parse skills for display
-                var skillsList = !string.IsNullOrEmpty(userDto.Skills) ? 
-                    userDto.Skills.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() : 
-                    new string[0];
-
-                return CreatedAtAction(nameof(GetById), new { id = userId }, new
-                {
-                    User = createdUser,
-                    Message = "? User created successfully!",
-                    AutoTagging = new
-                    {
-                        SkillTagsCreated = tagsCreated,
-                        Skills = skillsList,
-                        Note = tagsCreated > 0 ? 
-                            $"??? {tagsCreated} skill tags created automatically - you're now discoverable by matching interests!" :
-                            "?? No skills provided - add skills to your profile to become discoverable"
-                    }
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = "Failed to create user", Details = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// PUT: api/users/{id}
-        /// Updates an existing user's information and AUTOMATICALLY refreshes their skill tags.
-        /// Old skill tags are removed, new ones are created based on updated skills.
-        /// Authorization: Users can only update their own profile.
-        /// </summary>
-        /// <param name="id">The ID of the user to update</param>
-        /// <param name="userDto">The updated user data (excluding password and email)</param>
-        /// <returns>Success message with automatic tag update summary</returns>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto userDto)
-        {
-            // Authorization: Users can only update their own profile
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId != id)
-            {
-                return Forbid("You can only update your own profile");
-            }
-
-            try
-            {
-                // Step 1: Update the user
-                var success = await _service.UpdateUserAsync(id, userDto);
-                if (!success) return NotFound();
-
-                // Step 2: AUTOMATICALLY update skill tags (removes old, creates new, no duplicates)
-                var tagsCreated = await _autoTaggingService.UpdateUserSkillTagsAsync(id, userDto.Skills);
-
-                // Parse skills for display
-                var skillsList = !string.IsNullOrEmpty(userDto.Skills) ? 
-                    userDto.Skills.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() : 
-                    new string[0];
-
-                return Ok(new
-                {
-                    Message = "? Profile updated successfully!",
-                    AutoTagging = new
-                    {
-                        SkillTagsRefreshed = true,
-                        NewSkillTagsCreated = tagsCreated,
-                        UpdatedSkills = skillsList,
-                        Note = tagsCreated > 0 ? 
-                            $"?? Skill tags refreshed - {tagsCreated} new tags created based on your updated skills!" :
-                            "?? Skill tags cleared - add skills to make yourself discoverable"
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = "Failed to update user", Details = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// DELETE: api/users/{id}
-        /// Deletes a user by their ID.
-        /// This will AUTOMATICALLY remove all associated skill tags and group memberships.
-        /// Authorization: Users can only delete their own account.
-        /// </summary>
-        /// <param name="id">The ID of the user to delete</param>
-        /// <returns>Success message confirming deletion and automatic cleanup</returns>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            // Authorization: Users can only delete their own account
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId != id)
-            {
-                return Forbid("You can only delete your own account");
-            }
-
-            try
-            {
-                // Step 1: Clean up skill tags before deleting user
-                await _autoTaggingService.RemoveUserSkillTagsAsync(id);
-
-                // Step 2: Delete the user (group memberships cascade delete automatically)
-                var success = await _service.DeleteUserAsync(id);
-                if (!success) return NotFound();
-                
-                return Ok(new 
-                { 
-                    Message = "? Account deleted successfully!",
-                    AutoCleanup = new
-                    {
-                        SkillTagsRemoved = true,
-                        GroupMembershipsRemoved = true,
-                        Note = "All associated data has been automatically cleaned up"
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = "Failed to delete user", Details = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// PUT: api/users/{id}/change-password
-        /// Changes a user's password after verifying their current password.
-        /// The new password is automatically hashed using SHA256 before storage.
-        /// Authorization: Users can only change their own password.
-        /// </summary>
-        /// <param name="id">The ID of the user changing their password</param>
-        /// <param name="changePasswordDto">The current and new password data</param>
-        /// <returns>Success message if changed, BadRequest if validation fails, Forbid if not authorized</returns>
-        [HttpPut("{id}/change-password")]
-        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDto changePasswordDto)
-        {
-            // Authorization: Users can only change their own password
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId != id)
-            {
-                return Forbid("You can only change your own password");
-            }
-
-            // Validate that new passwords match
-            if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
-            {
-                return BadRequest(new { Error = "New password and confirmation do not match" });
-            }
-
-            // Validate password strength
-            if (changePasswordDto.NewPassword.Length < 6)
-            {
-                return BadRequest(new { Error = "New password must be at least 6 characters long" });
-            }
-
-            var success = await _service.ChangePasswordAsync(id, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
-            
-            if (!success)
-            {
-                return BadRequest(new { Error = "Current password is incorrect or user not found" });
-            }
-
-            return Ok(new { Message = "Password changed successfully" });
-        }
+        #region Essential User Functionality
 
         /// <summary>
         /// GET: api/users/me
-        /// Gets the current authenticated user's profile information.
+        /// Gets the current authenticated user's profile information and user ID.
+        /// This is the primary endpoint for users to retrieve their own information.
         /// </summary>
-        /// <returns>Current user's profile data</returns>
+        /// <returns>Current user's complete profile data including their user ID</returns>
         [HttpGet("me")]
-        public async Task<IActionResult> GetCurrentUser()
+        public async Task<IActionResult> GetMyProfile()
         {
             var currentUserId = GetCurrentUserId();
             if (currentUserId == null)
@@ -295,7 +65,228 @@ namespace StudyGroup.Api.Controllers
                 return NotFound("User not found");
             }
 
-            return Ok(user);
+            return Ok(new
+            {
+                Message = "?? Your Profile Information",
+                User = user,
+                UserId = user.UserId, // Explicitly highlight the user ID
+                Note = "This is your complete profile information including your unique user ID"
+            });
         }
+
+        /// <summary>
+        /// GET: api/users/me/id
+        /// Gets just the current authenticated user's ID.
+        /// Lightweight endpoint for when you only need the user ID.
+        /// </summary>
+        /// <returns>The current user's ID</returns>
+        [HttpGet("me/id")]
+        public IActionResult GetMyUserId()
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            return Ok(new
+            {
+                Message = "?? Your User ID",
+                UserId = currentUserId.Value,
+                Note = "Use this ID for operations that require your user identifier"
+            });
+        }
+
+        /// <summary>
+        /// PUT: api/users/me
+        /// Updates the current authenticated user's profile information.
+        /// AUTOMATICALLY refreshes skill tags based on updated skills.
+        /// AUTHORIZATION: Users can only update their own profile.
+        /// VALIDATION: Includes both Data Annotations and business logic validation.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "firstName": "John",
+        ///   "lastName": "Doe Updated",
+        ///   "skills": "C#, ASP.NET Core, React, JavaScript",
+        ///   "visibility": true,
+        ///   "bio": "Updated bio - Full-stack developer and student"
+        /// }
+        /// </summary>
+        /// <param name="userDto">The updated user data (excludes password and email)</param>
+        /// <returns>Success message with automatic tag update summary</returns>
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserDto userDto)
+        {
+            // Step 1: Check for Data Annotations validation errors
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    Error = "Validation failed",
+                    ValidationErrors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
+                        ),
+                    Message = "Please correct the validation errors and try again"
+                });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            try
+            {
+                // Step 2: Update the user profile (includes service-level validation)
+                var success = await _service.UpdateUserAsync(currentUserId.Value, userDto);
+                if (!success) 
+                {
+                    return BadRequest(new { Error = "Failed to update profile" });
+                }
+
+                // Step 3: AUTOMATICALLY update skill tags (removes old, creates new)
+                var tagsCreated = await _autoTaggingService.UpdateUserSkillTagsAsync(currentUserId.Value, userDto.Skills);
+
+                // Parse skills for display
+                var skillsList = !string.IsNullOrEmpty(userDto.Skills) ? 
+                    userDto.Skills.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() : 
+                    new string[0];
+
+                return Ok(new
+                {
+                    Message = "? Profile updated successfully!",
+                    UserId = currentUserId.Value,
+                    UpdatedData = new
+                    {
+                        FirstName = userDto.FirstName,
+                        LastName = userDto.LastName,
+                        Skills = skillsList,
+                        Visibility = userDto.Visibility,
+                        Bio = userDto.Bio
+                    },
+                    AutoTagging = new
+                    {
+                        SkillTagsRefreshed = true,
+                        NewSkillTagsCreated = tagsCreated,
+                        Note = tagsCreated > 0 ? 
+                            $"??? {tagsCreated} skill tags refreshed - you're discoverable by matching study groups!" :
+                            "?? Skill tags cleared - add skills to become discoverable by study groups"
+                    },
+                    Validation = new
+                    {
+                        Status = "? All validation checks passed",
+                        Note = "Data Annotations and business logic validation completed successfully"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new 
+                { 
+                    Error = "Business logic validation failed", 
+                    Details = ex.Message,
+                    Note = "Please correct the issues and try again"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to update profile", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/users/me/change-password
+        /// Changes the current authenticated user's password after verifying their current password.
+        /// SECURITY: Users can ONLY change their own password - no admin overrides.
+        /// VALIDATION: Includes both Data Annotations and business logic validation.
+        /// The new password is automatically hashed before storage.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "currentPassword": "OldPassword123!",
+        ///   "newPassword": "NewSecurePassword456!",
+        ///   "confirmNewPassword": "NewSecurePassword456!"
+        /// }
+        /// </summary>
+        /// <param name="changePasswordDto">Current password and new password data</param>
+        /// <returns>Success message if changed, error if validation fails</returns>
+        [HttpPut("me/change-password")]
+        public async Task<IActionResult> ChangeMyPassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            // Step 1: Check for Data Annotations validation errors
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    Error = "Password validation failed",
+                    ValidationErrors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
+                        ),
+                    Message = "Please correct the password validation errors and try again"
+                });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            try
+            {
+                // Step 2: Attempt to change password (includes service-level validation)
+                var success = await _service.ChangePasswordAsync(currentUserId.Value, 
+                    changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+                
+                if (!success)
+                {
+                    return BadRequest(new 
+                    { 
+                        Error = "Password change failed",
+                        Message = "Current password is incorrect",
+                        Note = "Please verify your current password and try again"
+                    });
+                }
+
+                return Ok(new 
+                { 
+                    Message = "?? Password changed successfully!",
+                    UserId = currentUserId.Value,
+                    Security = new
+                    {
+                        Note = "Your password has been securely updated",
+                        Recommendation = "Remember to use this new password for future logins"
+                    },
+                    Validation = new
+                    {
+                        Status = "? All password validation checks passed",
+                        SecurityLevel = "Strong password requirements enforced"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new 
+                { 
+                    Error = "Password validation failed", 
+                    Details = ex.Message,
+                    Note = "Please ensure your new password meets all security requirements"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to change password", Details = ex.Message });
+            }
+        }
+
+        #endregion
     }
 }

@@ -33,7 +33,7 @@ builder.Services.AddSwaggerGen(c =>
     { 
         Title = "StudyGroup API", 
         Version = "v1",
-        Description = "StudyGroup API with JWT Authentication and Smart Tag Matching. Use /api/auth/login to get JWT token."
+        Description = "StudyGroup API with JWT Authentication, Smart Tag Matching, and Course Scraping. Use /api/auth/login to get JWT token."
     });
 
     // Add JWT Authentication to Swagger
@@ -75,6 +75,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register Auto-Tagging Service for skill/course tag management
 builder.Services.AddScoped<AutoTaggingService>();
+
+// Register Course Scraping Service for populating course database
+builder.Services.AddScoped<CourseScrapingService>();
 
 // JWT Authentication setup with flexible token handling
 var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -174,7 +177,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyGroup API v1");
-        c.DocumentTitle = "StudyGroup API - Smart Tag Matching";
+        c.DocumentTitle = "StudyGroup API - Smart Tag Matching & Course Scraping";
         c.DefaultModelsExpandDepth(-1);
         c.DisplayRequestDuration();
     });

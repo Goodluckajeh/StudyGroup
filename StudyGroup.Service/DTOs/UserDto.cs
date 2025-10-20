@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace StudyGroup.Service.DTOs
 {
     // DTO for returning user data (excluding sensitive fields)
@@ -12,33 +14,71 @@ namespace StudyGroup.Service.DTOs
         public string? Bio { get; set; }
     }
 
-    // DTO for creating a user
+    // DTO for creating a user with data annotations validation
     public class CreateUserDto
     {
+        [Required(ErrorMessage = "First name is required")]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
         public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Last name is required")]
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
         public string LastName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
         public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required")]
+        [StringLength(128, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 128 characters")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", 
+            ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, and one number")]
         public string Password { get; set; } = string.Empty;
+
+        [StringLength(1000, ErrorMessage = "Skills cannot exceed 1000 characters")]
         public string? Skills { get; set; }
+
         public bool? Visibility { get; set; }
+
+        [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]
         public string? Bio { get; set; }
     }
 
     // DTO for updating a user (excludes password - use separate endpoint for password changes)
     public class UpdateUserDto
     {
+        [Required(ErrorMessage = "First name is required")]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
         public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Last name is required")]
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
         public string LastName { get; set; } = string.Empty;
+
+        [StringLength(1000, ErrorMessage = "Skills cannot exceed 1000 characters")]
         public string? Skills { get; set; }
+
         public bool? Visibility { get; set; }
+
+        [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]
         public string? Bio { get; set; }
     }
 
-    // DTO for changing password
+    // DTO for changing password with data annotations validation
     public class ChangePasswordDto
     {
+        [Required(ErrorMessage = "Current password is required")]
         public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "New password is required")]
+        [StringLength(128, MinimumLength = 8, ErrorMessage = "New password must be between 8 and 128 characters")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", 
+            ErrorMessage = "New password must contain at least one uppercase letter, one lowercase letter, and one number")]
         public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password confirmation is required")]
+        [Compare("NewPassword", ErrorMessage = "New password and confirmation do not match")]
         public string ConfirmNewPassword { get; set; } = string.Empty;
     }
 }

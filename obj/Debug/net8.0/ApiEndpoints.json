@@ -111,6 +111,36 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "StudyGroup.Api.Controllers.CourseScrapingController",
+    "Method": "RunCourseScraping",
+    "RelativePath": "api/CourseScraping/run",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "StudyGroup.Api.Controllers.CourseScrapingController",
+    "Method": "GetScrapingStatistics",
+    "RelativePath": "api/CourseScraping/statistics",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "StudyGroup.Api.Controllers.CourseScrapingController",
+    "Method": "TestScrapingConnection",
+    "RelativePath": "api/CourseScraping/test",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "StudyGroup.Api.Controllers.EntityTypesController",
     "Method": "GetAll",
     "RelativePath": "api/EntityTypes",
@@ -570,8 +600,8 @@
   },
   {
     "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "GetAll",
-    "RelativePath": "api/Users",
+    "Method": "GetMyProfile",
+    "RelativePath": "api/Users/me",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -580,49 +610,12 @@
   },
   {
     "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "Create",
-    "RelativePath": "api/Users",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userDto",
-        "Type": "StudyGroup.Service.DTOs.CreateUserDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "GetById",
-    "RelativePath": "api/Users/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "Update",
-    "RelativePath": "api/Users/{id}",
+    "Method": "UpdateMyProfile",
+    "RelativePath": "api/Users/me",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
       {
         "Name": "userDto",
         "Type": "StudyGroup.Service.DTOs.UpdateUserDto",
@@ -633,33 +626,12 @@
   },
   {
     "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "Delete",
-    "RelativePath": "api/Users/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "ChangePassword",
-    "RelativePath": "api/Users/{id}/change-password",
+    "Method": "ChangeMyPassword",
+    "RelativePath": "api/Users/me/change-password",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
       {
         "Name": "changePasswordDto",
         "Type": "StudyGroup.Service.DTOs.ChangePasswordDto",
@@ -670,8 +642,8 @@
   },
   {
     "ContainingType": "StudyGroup.Api.Controllers.UsersController",
-    "Method": "GetCurrentUser",
-    "RelativePath": "api/Users/me",
+    "Method": "GetMyUserId",
+    "RelativePath": "api/Users/me/id",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

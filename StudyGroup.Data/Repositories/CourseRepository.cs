@@ -37,6 +37,18 @@ namespace StudyGroup.Data.Repositories
             return await _dbConnection.QueryFirstOrDefaultAsync<Course>(CourseSql.GetByName, new { CourseName = courseName });
         }
 
+        // Gets a single course by its code (for scraping and course code lookup)
+        public async Task<Course?> GetByCodeAsync(string courseCode)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<Course>(CourseSql.GetByCode, new { CourseCode = courseCode });
+        }
+
+        // Checks if a course exists by its code (for scraping duplicate prevention)
+        public async Task<bool> ExistsByCodeAsync(string courseCode)
+        {
+            return await _dbConnection.QuerySingleAsync<bool>(CourseSql.CheckExistsByCode, new { CourseCode = courseCode });
+        }
+
         // Inserts a new course and returns its ID
         public async Task<int> CreateAsync(Course course)
         {

@@ -3,12 +3,58 @@
   "WorkspaceRootPath": "C:\\Professional software dev\\StudyGroup\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
-      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\validation\\uservalidator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\services\\autotaggingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:services\\autotaggingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\validation\\validationresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\validation\\studygroupvalidator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\dtos\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Professional software dev\\StudyGroup\\CourseScraperController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CourseScraperController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Professional software dev\\StudyGroup\\CourseScraperService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CourseScraperService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\models\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\sqlqueries\\coursesql.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\interfaces\\icourserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F36F5BF3-2A0B-460D-BEF2-BB96973B2B11}|..\\StudyGroup.Data\\StudyGroup.Repository.csproj|c:\\professional software dev\\studygroup.data\\repositories\\courserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0291ADC6-7280-4394-BC4B-ECC1ADCE78A6}|..\\StudyGroup.Service\\StudyGroup.Service.csproj|c:\\professional software dev\\studygroup.service\\services\\coursescrapingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|c:\\professional software dev\\studygroup\\controllers\\coursescrapingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B768BB9-93CA-461B-A59E-0F758BBD8918}|StudyGroup.Api.csproj|solutionrelative:controllers\\coursescrapingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +64,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,28 +72,210 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "README.md",
-              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\README.md",
-              "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "C:\\Professional software dev\\StudyGroup\\README.md",
-              "RelativeToolTip": "README.md",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2025-10-12T16:42:57.05Z",
+              "DocumentIndex": 11,
+              "Title": "CourseSql.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\SqlQueries\\CourseSql.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:27:22.591Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 10,
+              "Title": "Course.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Models\\Course.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Models\\Course.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Models\\Course.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Models\\Course.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAABYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:26:57.032Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CourseScraperController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\CourseScraperController.cs",
+              "RelativeDocumentMoniker": "CourseScraperController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\CourseScraperController.cs",
+              "RelativeToolTip": "CourseScraperController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:22:06.251Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Professional software dev\\StudyGroup\\Program.cs",
               "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAL8AAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:19:37.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UserValidator.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Validation\\UserValidator.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Validation\\UserValidator.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Validation\\UserValidator.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Validation\\UserValidator.cs",
+              "ViewState": "AgIAALcAAAAAAAAAAAApwMcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:38:10.975Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CourseScrapingController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\CourseScrapingController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CourseScrapingController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\CourseScrapingController.cs",
+              "RelativeToolTip": "Controllers\\CourseScrapingController.cs",
+              "ViewState": "AgIAAM0AAAAAAAAAAABRwNAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:28:52.273Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "CourseScrapingService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\CourseScrapingService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\CourseScrapingService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\CourseScrapingService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\CourseScrapingService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADMBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:28:22.947Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "CourseRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Repositories\\CourseRepository.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:27:41.994Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ICourseRepository.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\ICourseRepository.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Data\\Interfaces\\ICourseRepository.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Data\\Interfaces\\ICourseRepository.cs",
+              "RelativeToolTip": "..\\StudyGroup.Data\\Interfaces\\ICourseRepository.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAMBUwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T02:27:30.044Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "CourseScraperService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\CourseScraperService.cs",
+              "RelativeDocumentMoniker": "CourseScraperService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\CourseScraperService.cs",
+              "RelativeToolTip": "CourseScraperService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-11T18:10:42.167Z",
+              "WhenOpened": "2025-10-20T02:22:06.309Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ValidationResult.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Validation\\ValidationResult.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Validation\\ValidationResult.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Validation\\ValidationResult.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Validation\\ValidationResult.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:38:30.087Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AutoTaggingService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Services\\AutoTaggingService.cs",
+              "RelativeDocumentMoniker": "Services\\AutoTaggingService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Services\\AutoTaggingService.cs",
+              "RelativeToolTip": "Services\\AutoTaggingService.cs",
+              "ViewState": "AgIAAEQBAAAAAAAAAAAqwDwBAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T03:51:34.092Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:27:21.618Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "StudyGroupValidator.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Validation\\StudyGroupValidator.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Validation\\StudyGroupValidator.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Validation\\StudyGroupValidator.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Validation\\StudyGroupValidator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAL4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:39:03.464Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "UserDto.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\DTOs\\UserDto.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAABZwFQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:40:09.213Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Professional software dev\\StudyGroup.Service\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "..\\StudyGroup.Service\\Services\\UserService.cs",
+              "ToolTip": "C:\\Professional software dev\\StudyGroup.Service\\Services\\UserService.cs",
+              "RelativeToolTip": "..\\StudyGroup.Service\\Services\\UserService.cs",
+              "ViewState": "AgIAAPkAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-20T01:39:43.336Z",
               "EditorCaption": ""
             }
           ]

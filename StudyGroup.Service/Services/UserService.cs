@@ -4,6 +4,7 @@ using StudyGroup.Data.Models;
 using StudyGroup.Data.Interfaces;
 using StudyGroup.Service.Interfaces;
 using StudyGroup.Service.DTOs;
+using StudyGroup.Service.Validation;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,10 +15,12 @@ namespace StudyGroup.Service.Services
     /// Implements IUserService, contains business logic for users.
     /// Handles password hashing using SHA256 for compatibility with AuthService.
     /// Automatically manages skill tags when users update their skills.
+    /// Includes comprehensive validation for all user operations.
     /// </summary>
     public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
+        private readonly UserValidator _validator;
 
         /// <summary>
         /// Initializes a new instance of the UserService.
@@ -26,6 +29,7 @@ namespace StudyGroup.Service.Services
         public UserService(IUserRepository repository)
         {
             _repository = repository;
+            _validator = new UserValidator();
         }
 
         /// <summary>
@@ -93,25 +97,34 @@ namespace StudyGroup.Service.Services
 
         /// <summary>
         /// Creates a new user with a securely hashed password.
+        /// Includes comprehensive validation before creation.
         /// The user account is immediately active and ready to use.
         /// Note: Skill tags are NOT automatically created here to avoid circular dependency.
         /// Use AutoTaggingService separately after user creation if needed.
         /// </summary>
         /// <param name="userDto">The user data including plain text password</param>
         /// <returns>The ID of the created user</returns>
-        /// <exception cref="InvalidOperationException">Thrown when email already exists</exception>
+        /// <exception cref="InvalidOperationException">Thrown when validation fails or email already exists</exception>
         public async Task<int> CreateUserAsync(CreateUserDto userDto)
         {
-            // Check if email already exists
+            // Step 1: Validate input data
+            var validationResult = _validator.ValidateCreate(userDto);
+            if (!validationResult.IsValid)
+            {
+                throw new InvalidOperationException($"Validation failed: {validationResult.GetErrorsAsString()}");
+            }
+
+            // Step 2: Check if email already exists
             var existingUser = await _repository.GetByEmailAsync(userDto.Email);
             if (existingUser != null)
             {
                 throw new InvalidOperationException("An account with this email address already exists");
             }
 
-            // Hash the password using SHA256
+            // Step 3: Hash the password using SHA256
             var hashedPassword = HashPassword(userDto.Password);
 
+            // Step 4: Create user entity
             var user = new User
             {
                 FirstName = userDto.FirstName,
@@ -131,6 +144,7 @@ namespace StudyGroup.Service.Services
 
         /// <summary>
         /// Updates an existing user's information.
+        /// Includes comprehensive validation before update.
         /// Note: This method does not update passwords. Use ChangePasswordAsync for password changes.
         /// Note: Skill tags are NOT automatically updated here to avoid circular dependency.
         /// Use AutoTaggingService separately after user update if needed.
@@ -138,12 +152,21 @@ namespace StudyGroup.Service.Services
         /// <param name="userId">The ID of the user to update</param>
         /// <param name="userDto">The updated user data (excluding password)</param>
         /// <returns>True if updated successfully, false if user not found</returns>
+        /// <exception cref="InvalidOperationException">Thrown when validation fails</exception>
         public async Task<bool> UpdateUserAsync(int userId, UpdateUserDto userDto)
         {
+            // Step 1: Validate input data
+            var validationResult = _validator.ValidateUpdate(userDto);
+            if (!validationResult.IsValid)
+            {
+                throw new InvalidOperationException($"Validation failed: {validationResult.GetErrorsAsString()}");
+            }
+
+            // Step 2: Get existing user
             var user = await _repository.GetByIdAsync(userId);
             if (user == null) return false;
             
-            // Update user information (email and password hash remain unchanged for security)
+            // Step 3: Update user information (email and password hash remain unchanged for security)
             user.FirstName = userDto.FirstName;
             user.LastName = userDto.LastName;
             user.Skills = userDto.Skills;
@@ -188,14 +211,32 @@ namespace StudyGroup.Service.Services
 
         /// <summary>
         /// Changes a user's password.
+        /// Includes comprehensive validation before changing password.
         /// Verifies the current password before setting the new one.
         /// </summary>
         /// <param name="userId">The ID of the user</param>
         /// <param name="currentPassword">The user's current password</param>
         /// <param name="newPassword">The new password to set</param>
         /// <returns>True if password changed successfully, false if current password is incorrect or user not found</returns>
+        /// <exception cref="InvalidOperationException">Thrown when validation fails</exception>
         public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
+            // Step 1: Create DTO for validation
+            var changePasswordDto = new ChangePasswordDto
+            {
+                CurrentPassword = currentPassword,
+                NewPassword = newPassword,
+                ConfirmNewPassword = newPassword // Assume confirmation matches for this method
+            };
+
+            // Step 2: Validate password change data
+            var validationResult = _validator.ValidatePasswordChange(changePasswordDto);
+            if (!validationResult.IsValid)
+            {
+                throw new InvalidOperationException($"Password validation failed: {validationResult.GetErrorsAsString()}");
+            }
+
+            // Step 3: Get user and verify current password
             var user = await _repository.GetByIdAsync(userId);
             if (user == null) return false;
 
@@ -203,7 +244,7 @@ namespace StudyGroup.Service.Services
             var isCurrentPasswordValid = VerifyPassword(currentPassword, user.PasswordHash);
             if (!isCurrentPasswordValid) return false;
 
-            // Hash the new password and update
+            // Step 4: Hash the new password and update
             user.PasswordHash = HashPassword(newPassword);
             return await _repository.UpdateAsync(user);
         }

@@ -9,7 +9,7 @@
       "StudyGroup.Api/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.0.3",
-          "HtmlAgilityPack": "1.12.3",
+          "HtmlAgilityPack": "1.12.4",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.11",
           "Microsoft.EntityFrameworkCore": "9.0.9",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.9",
@@ -72,11 +72,11 @@
           }
         }
       },
-      "HtmlAgilityPack/1.12.3": {
+      "HtmlAgilityPack/1.12.4": {
         "runtime": {
           "lib/net7.0/HtmlAgilityPack.dll": {
-            "assemblyVersion": "1.12.3.0",
-            "fileVersion": "1.12.3.0"
+            "assemblyVersion": "1.12.4.0",
+            "fileVersion": "1.12.4.0"
           }
         }
       },
@@ -904,7 +904,7 @@
       "StudyGroup.Service/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.0.3",
-          "HtmlAgilityPack": "1.12.3",
+          "HtmlAgilityPack": "1.12.4",
           "Microsoft.AspNetCore.Identity": "2.3.1",
           "StudyGroup.Repository": "1.0.0"
         },
@@ -951,12 +951,12 @@
       "path": "dapper/2.1.66",
       "hashPath": "dapper.2.1.66.nupkg.sha512"
     },
-    "HtmlAgilityPack/1.12.3": {
+    "HtmlAgilityPack/1.12.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-NyckYLSQBI5fB9YH5XN94EGfidD5FgaKnfmGqApKQYBaf3fFmv9KGodl5kvUZg/QLz+/M4rE7vwUig25eA8PqQ==",
-      "path": "htmlagilitypack/1.12.3",
-      "hashPath": "htmlagilitypack.1.12.3.nupkg.sha512"
+      "sha512": "sha512-ljqvBabvFwKoLniuoQKO8b5bJfJweKLs4fUNS/V5dsvpo0A8MlJqxxn9XVmP2DaskbUXty6IYaWAi1SArGIMeQ==",
+      "path": "htmlagilitypack/1.12.4",
+      "hashPath": "htmlagilitypack.1.12.4.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication/2.3.0": {
       "type": "package",

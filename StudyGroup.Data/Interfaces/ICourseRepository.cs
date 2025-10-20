@@ -10,6 +10,8 @@ namespace StudyGroup.Data.Interfaces
         Task<IEnumerable<Course>> GetAllAsync();
         Task<Course?> GetByIdAsync(int courseId);
         Task<Course?> GetByNameAsync(string courseName);
+        Task<Course?> GetByCodeAsync(string courseCode);
+        Task<bool> ExistsByCodeAsync(string courseCode);
         Task<int> CreateAsync(Course course);
         Task<bool> UpdateAsync(Course course);
         Task<bool> DeleteAsync(int courseId);
