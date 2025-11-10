@@ -1,0 +1,257 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using StudyGroup.Api.Hubs;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Service.Interfaces;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class MessagesController : ControllerBase
+    {
+        private readonly IMessageService _messageService;
+        private readonly IConversationService _conversationService;
+        private readonly IHubContext<ChatHub> _hubContext;
+
+        public MessagesController(
+            IMessageService messageService, 
+            IConversationService conversationService,
+            IHubContext<ChatHub> hubContext)
+        {
+            _messageService = messageService;
+            _conversationService = conversationService;
+            _hubContext = hubContext;
+        }
+
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : null;
+        }
+
+        /// <summary>
+        /// GET: api/messages/conversations/{conversationId}/messages
+        /// Get messages for a specific conversation
+        /// </summary>
+        [HttpGet("conversations/{conversationId}/messages")]
+        public async Task<IActionResult> GetConversationMessages(int conversationId, [FromQuery] int skip = 0, [FromQuery] int take = 50)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            // Verify user is participant
+            var isParticipant = await _conversationService.IsUserParticipantAsync(conversationId, currentUserId.Value);
+            if (!isParticipant) return Forbid("You are not a participant in this conversation");
+
+            var messages = await _messageService.GetConversationMessagesAsync(conversationId, currentUserId.Value, skip, take);
+            
+            return Ok(new
+            {
+                ConversationId = conversationId,
+                Messages = messages,
+                Skip = skip,
+                Take = take,
+                Count = messages.Count()
+            });
+        }
+
+        /// <summary>
+        /// POST: api/messages
+        /// Send a new message
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> SendMessage([FromBody] CreateMessageDto messageDto)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            // Ensure sender matches current user
+            if (messageDto.SenderId != currentUserId.Value)
+                return Forbid("You can only send messages as yourself");
+
+            // Verify user is participant
+            var isParticipant = await _conversationService.IsUserParticipantAsync(messageDto.ConversationId, currentUserId.Value);
+            if (!isParticipant) return Forbid("You are not a participant in this conversation");
+
+            try
+            {
+                var messageId = await _messageService.CreateMessageAsync(messageDto);
+                var message = await _messageService.GetMessageByIdAsync(messageId);
+
+                if (message != null)
+                {
+                    // Broadcast message to all participants via SignalR
+                    await _hubContext.Clients.Group($"Conversation_{messageDto.ConversationId}")
+                        .SendAsync("ReceiveMessage", new
+                        {
+                            ConversationId = messageDto.ConversationId,
+                            Message = message,
+                            Type = "NewMessage"
+                        });
+                }
+
+                return CreatedAtAction(nameof(GetMessage), new { id = messageId }, new
+                {
+                    Message = message,
+                    Success = true,
+                    MessageId = messageId
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to send message", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET: api/messages/{id}
+        /// Get a specific message
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMessage(int id)
+        {
+            var message = await _messageService.GetMessageByIdAsync(id);
+            if (message == null) return NotFound();
+
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            // Verify user is participant in the conversation
+            var isParticipant = await _conversationService.IsUserParticipantAsync(message.ConversationId, currentUserId.Value);
+            if (!isParticipant) return Forbid("You are not a participant in this conversation");
+
+            return Ok(message);
+        }
+
+        /// <summary>
+        /// PUT: api/messages/{id}
+        /// Edit a message (only sender can edit)
+        /// </summary>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateMessage(int id, [FromBody] UpdateMessageDto messageDto)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            var existingMessage = await _messageService.GetMessageByIdAsync(id);
+            if (existingMessage == null) return NotFound();
+
+            // Only sender can edit their message
+            if (existingMessage.SenderId != currentUserId.Value)
+                return Forbid("You can only edit your own messages");
+
+            var success = await _messageService.UpdateMessageAsync(id, messageDto);
+            if (!success) return BadRequest("Failed to update message");
+
+            var updatedMessage = await _messageService.GetMessageByIdAsync(id);
+            
+            if (updatedMessage != null)
+            {
+                // Broadcast message update via SignalR
+                await _hubContext.Clients.Group($"Conversation_{updatedMessage.ConversationId}")
+                    .SendAsync("MessageUpdated", new
+                    {
+                        ConversationId = updatedMessage.ConversationId,
+                        Message = updatedMessage,
+                        Type = "MessageUpdated"
+                    });
+            }
+
+            return Ok(new
+            {
+                Message = updatedMessage,
+                Success = true
+            });
+        }
+
+        /// <summary>
+        /// DELETE: api/messages/{id}
+        /// Delete a message (soft delete)
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMessage(int id)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            var message = await _messageService.GetMessageByIdAsync(id);
+            if (message == null) return NotFound();
+
+            // Only sender can delete their message
+            if (message.SenderId != currentUserId.Value)
+                return Forbid("You can only delete your own messages");
+
+            var success = await _messageService.DeleteMessageAsync(id);
+            if (!success) return BadRequest("Failed to delete message");
+
+            // Broadcast message deletion via SignalR
+            await _hubContext.Clients.Group($"Conversation_{message.ConversationId}")
+                .SendAsync("MessageDeleted", new
+                {
+                    ConversationId = message.ConversationId,
+                    MessageId = id,
+                    Type = "MessageDeleted"
+                });
+
+            return Ok(new { Success = true, Message = "Message deleted successfully" });
+        }
+
+        /// <summary>
+        /// POST: api/messages/conversations/{conversationId}/mark-read
+        /// Mark messages as read
+        /// </summary>
+        [HttpPost("conversations/{conversationId}/mark-read")]
+        public async Task<IActionResult> MarkMessagesAsRead(int conversationId)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            var isParticipant = await _conversationService.IsUserParticipantAsync(conversationId, currentUserId.Value);
+            if (!isParticipant) return Forbid("You are not a participant in this conversation");
+
+            var success = await _messageService.MarkMessagesAsReadAsync(conversationId, currentUserId.Value);
+
+            if (success)
+            {
+                // Broadcast read receipt via SignalR
+                await _hubContext.Clients.Others
+                    .SendAsync("UserReadMessages", new
+                    {
+                        ConversationId = conversationId,
+                        UserId = currentUserId.Value,
+                        ReadAt = DateTime.UtcNow
+                    });
+            }
+
+            return Ok(new { Success = success });
+        }
+
+        /// <summary>
+        /// GET: api/messages/conversations/{conversationId}/new
+        /// Get new messages since a specific time
+        /// </summary>
+        [HttpGet("conversations/{conversationId}/new")]
+        public async Task<IActionResult> GetNewMessages(int conversationId, [FromQuery] DateTime since)
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null) return Unauthorized();
+
+            var isParticipant = await _conversationService.IsUserParticipantAsync(conversationId, currentUserId.Value);
+            if (!isParticipant) return Forbid("You are not a participant in this conversation");
+
+            var messages = await _messageService.GetNewMessagesAsync(conversationId, currentUserId.Value, since);
+            
+            return Ok(new
+            {
+                ConversationId = conversationId,
+                Since = since,
+                NewMessages = messages,
+                Count = messages.Count()
+            });
+        }
+    }
+}

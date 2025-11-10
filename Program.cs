@@ -9,8 +9,10 @@ using StudyGroup.Data.Interfaces;
 using StudyGroup.Data.Repositories;
 using StudyGroup.Service.Settings;
 using StudyGroup.Api.Services;
+using StudyGroup.Api.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http.Features;
 using System.Text;
 using Microsoft.OpenApi.Models;
 
@@ -18,12 +20,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers()
-    .AddJsonOptions(x =>
-        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-    );
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        // Ensure DateTime values are serialized in ISO 8601 format with UTC timezone (Z suffix)
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never;
+    });
 
 // Configure JWT Settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// Add SignalR for real-time messaging
+builder.Services.AddSignalR();
+
+// Configure file upload settings
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800; // 50MB
+});
 
 // Configure Swagger/OpenAPI with JWT Authentication
 builder.Services.AddEndpointsApiExplorer();
@@ -33,7 +48,7 @@ builder.Services.AddSwaggerGen(c =>
     { 
         Title = "StudyGroup API", 
         Version = "v1",
-        Description = "StudyGroup API with JWT Authentication, Smart Tag Matching, and Course Scraping. Use /api/auth/login to get JWT token."
+        Description = "StudyGroup API with JWT Authentication, Smart Tag Matching, Course Scraping, and Real-Time Messaging. Use /api/auth/login to get JWT token."
     });
 
     // Add JWT Authentication to Swagger
@@ -133,6 +148,15 @@ builder.Services.AddAuthentication(options =>
                 }
             }
             
+            // Support SignalR - extract access token from query string
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+            {
+                context.Token = accessToken;
+            }
+            
             return Task.CompletedTask;
         }
     };
@@ -141,6 +165,18 @@ builder.Services.AddAuthentication(options =>
 // Authorization configuration
 builder.Services.AddAuthorization();
 
+// CORS configuration - Allow frontend to make requests
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
@@ -148,21 +184,27 @@ builder.Services.AddScoped<IStudyGroupRepository, StudyGroupRepository>();
 builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IEntityTypeRepository, EntityTypeRepository>();
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 
-// StudyGroupService with CourseRepository dependency
+// StudyGroupService with ALL required dependencies
 builder.Services.AddScoped<IStudyGroupService>(provider => 
     new StudyGroupService(
         provider.GetRequiredService<IStudyGroupRepository>(),
-        provider.GetRequiredService<ICourseRepository>()
+        provider.GetRequiredService<ICourseRepository>(),
+        provider.GetRequiredService<IUserRepository>() // Added missing parameter
     ));
 
 builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IEntityTypeService, EntityTypeService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 // ----------------------
 // Build app
@@ -177,7 +219,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyGroup API v1");
-        c.DocumentTitle = "StudyGroup API - Smart Tag Matching & Course Scraping";
+        c.DocumentTitle = "StudyGroup API - Smart Tag Matching, Course Scraping & Real-Time Messaging";
         c.DefaultModelsExpandDepth(-1);
         c.DisplayRequestDuration();
     });
@@ -185,10 +227,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Enable static files for uploaded content
+app.UseStaticFiles();
+
+// Enable CORS (must be before Authentication/Authorization)
+app.UseCors("AllowFrontend");
+
 // Add Authentication and Authorization middleware (ORDER MATTERS!)
 app.UseAuthentication(); // Must come before UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map SignalR ChatHub endpoint
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

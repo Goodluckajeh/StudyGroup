@@ -111,36 +111,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "StudyGroup.Api.Controllers.CourseScrapingController",
-    "Method": "RunCourseScraping",
-    "RelativePath": "api/CourseScraping/run",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "StudyGroup.Api.Controllers.CourseScrapingController",
-    "Method": "GetScrapingStatistics",
-    "RelativePath": "api/CourseScraping/statistics",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "StudyGroup.Api.Controllers.CourseScrapingController",
-    "Method": "TestScrapingConnection",
-    "RelativePath": "api/CourseScraping/test",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "StudyGroup.Api.Controllers.EntityTypesController",
     "Method": "GetAll",
     "RelativePath": "api/EntityTypes",

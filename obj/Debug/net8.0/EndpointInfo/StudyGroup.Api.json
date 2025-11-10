@@ -193,42 +193,6 @@
         }
       }
     },
-    "/api/CourseScraping/run": {
-      "post": {
-        "tags": [
-          "CourseScraping"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/CourseScraping/statistics": {
-      "get": {
-        "tags": [
-          "CourseScraping"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/CourseScraping/test": {
-      "get": {
-        "tags": [
-          "CourseScraping"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/EntityTypes": {
       "get": {
         "tags": [

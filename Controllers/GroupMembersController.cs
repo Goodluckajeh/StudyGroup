@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using StudyGroup.Service.Interfaces;
 using StudyGroup.Service.DTOs;
+using StudyGroup.Data.Interfaces;
 using System.Security.Claims;
 
 namespace StudyGroup.Api.Controllers
@@ -20,16 +21,22 @@ namespace StudyGroup.Api.Controllers
     {
         private readonly IGroupMemberService _service;
         private readonly IStudyGroupService _studyGroupService;
+        private readonly IUserRepository _userRepository;
 
         /// <summary>
         /// Initializes a new instance of the GroupMembersController.
         /// </summary>
         /// <param name="service">The group member service for handling business logic</param>
         /// <param name="studyGroupService">The study group service for authorization checks</param>
-        public GroupMembersController(IGroupMemberService service, IStudyGroupService studyGroupService)
+        /// <param name="userRepository">The user repository for fetching user details</param>
+        public GroupMembersController(
+            IGroupMemberService service, 
+            IStudyGroupService studyGroupService,
+            IUserRepository userRepository)
         {
             _service = service;
             _studyGroupService = studyGroupService;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -319,23 +326,40 @@ namespace StudyGroup.Api.Controllers
                 var members = await _service.GetActiveMembersAsync(groupId);
                 var membersList = members.ToList();
 
+                // Enrich members with user details
+                var membersWithDetails = new List<object>();
+                foreach (var member in membersList)
+                {
+                    var user = await _userRepository.GetByIdAsync(member.UserId);
+                    membersWithDetails.Add(new
+                    {
+                        member.GroupMemberId,
+                        member.UserId,
+                        member.GroupId,
+                        member.StatusId,
+                        FirstName = user?.FirstName ?? "Unknown",
+                        LastName = user?.LastName ?? "User",
+                        Email = user?.Email ?? ""
+                    });
+                }
+
                 return Ok(new
                 {
-                    Message = $"?? Active Members of Study Group {groupId}",
+                    Message = $"👥 Active Members of Study Group {groupId}",
                     GroupId = groupId,
                     TotalMembers = membersList.Count,
-                    Members = membersList,
+                    Members = membersWithDetails,
                     YourRole = isCreator ? "Group Creator" : "Group Member",
                     PrivacyProtection = new
                     {
-                        Note = "?? Member list is only visible to group members",
+                        Note = "🔒 Member list is only visible to group members",
                         YourAccess = isMember ? "Granted as group member" : "Granted as group creator"
                     },
                     CreatorRights = isCreator ? new[]
                     {
-                        "? Remove any member from the group",
-                        "? Update group details",
-                        "? Delete the entire group"
+                        "✏️ Remove any member from the group",
+                        "📝 Update group details",
+                        "🗑️ Delete the entire group"
                     } : null,
                     MemberRights = isMember && !isCreator ? new[]
                     {
@@ -379,27 +403,48 @@ namespace StudyGroup.Api.Controllers
                 // Filter to only show active memberships (StatusId = 2)
                 var activeGroups = groups.Where(g => g.StatusId == 2).ToList();
 
-                // Add creator information for each group
+                // Add creator information and study group details for each group
                 var groupsWithCreatorInfo = new List<object>();
                 foreach (var group in activeGroups)
                 {
                     var studyGroup = await _studyGroupService.GetGroupByIdAsync(group.GroupId);
-                    bool isCreator = studyGroup?.CreatorId == currentUserId.Value;
+                    if (studyGroup == null) continue; // Skip if group not found
+                    
+                    bool isCreator = studyGroup.CreatorId == currentUserId.Value;
+                    
+                    // Get member count for this group
+                    var members = await _service.GetActiveMembersAsync(group.GroupId);
+                    var memberCount = members.Count();
                     
                     groupsWithCreatorInfo.Add(new
                     {
-                        Membership = group,
+                        Membership = new
+                        {
+                            group.GroupMemberId,
+                            group.GroupId,
+                            group.UserId,
+                            group.StatusId,
+                            // Add study group details to membership
+                            CourseName = studyGroup.CourseName,
+                            Topic = studyGroup.Topic,
+                            TimeSlot = studyGroup.TimeSlot,
+                            Description = studyGroup.Description,
+                            CreatorId = studyGroup.CreatorId,
+                            CreatorName = studyGroup.CreatorName,
+                            CurrentMemberCount = memberCount,
+                            JoinedAt = DateTime.UtcNow // You might want to add this to the GroupMember entity
+                        },
                         YourRole = isCreator ? "Creator" : "Member",
                         Rights = isCreator ? 
                             new[] { "Full management rights", "Can remove members", "Can delete group" } : 
                             new[] { "Can leave group", "Can participate", "Can view other members" },
-                        PrivacyAccess = "?? You can view member lists for all these groups"
+                        PrivacyAccess = "🔒 You can view member lists for all these groups"
                     });
                 }
                 
                 return Ok(new
                 {
-                    Message = $"?? Study Groups for User {userId}",
+                    Message = $"📚 Study Groups for User {userId}",
                     UserId = userId,
                     TotalGroups = activeGroups.Count,
                     Groups = groupsWithCreatorInfo,
@@ -475,7 +520,7 @@ namespace StudyGroup.Api.Controllers
                 
                 return Ok(new 
                 { 
-                    Message = "?? You have successfully left the study group",
+                    Message = "✅ You have successfully left the study group",
                     GroupId = groupId,
                     UserId = userId,
                     Action = "Voluntary Leave",

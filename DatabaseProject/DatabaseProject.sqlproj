@@ -69,5 +69,9 @@
     <Build Include="dbo\Tables\GroupMembers.sql" />
     <Build Include="dbo\Tables\EntityTypes.sql" />
     <Build Include="dbo\Tables\DaysOfWeek.sql" />
+    <Build Include="dbo\Tables\MessageTypes.sql" />
+    <Build Include="dbo\Tables\Messages.sql" />
+    <Build Include="dbo\Tables\Conversations.sql" />
+    <Build Include="dbo\Tables\ConversationParticipants.sql" />
   </ItemGroup>
 </Project>

@@ -6,6 +6,7 @@
     PRIMARY KEY CLUSTERED ([GroupMemberId] ASC),
     CONSTRAINT [FK_GroupMembers_Groups] FOREIGN KEY ([GroupId]) REFERENCES [dbo].[StudyGroups] ([GroupId]) ON DELETE CASCADE,
     CONSTRAINT [FK_GroupMembers_Status] FOREIGN KEY ([StatusId]) REFERENCES [dbo].[MembershipStatus] ([StatusId]),
-    CONSTRAINT [FK_GroupMembers_Users] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE
+    CONSTRAINT [FK_GroupMembers_Users] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE,
+    CONSTRAINT [UQ_GroupMembers_GroupUser] UNIQUE NONCLUSTERED ([GroupId] ASC, [UserId] ASC)
 );
 

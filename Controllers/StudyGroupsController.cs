@@ -210,7 +210,23 @@ namespace StudyGroup.Api.Controllers
                 // Step 1: Create the study group first
                 var groupId = await _service.CreateGroupAsync(groupDto);
                 
-                // Step 2: AUTOMATICALLY create course-related tags (no duplicates)
+                // Step 2: AUTOMATICALLY add the creator as a member (Active status)
+                try
+                {
+                    await _groupMemberService.CreateGroupMemberAsync(new Service.DTOs.CreateGroupMemberDto
+                    {
+                        GroupId = groupId,
+                        UserId = currentUserId.Value,
+                        StatusId = 2  // 2 = Active member
+                    });
+                }
+                catch (Exception memberEx)
+                {
+                    // Log but don't fail the group creation if membership fails
+                    Console.WriteLine($"Warning: Failed to add creator as member: {memberEx.Message}");
+                }
+                
+                // Step 3: AUTOMATICALLY create course-related tags (no duplicates)
                 var tagsCreated = 0;
                 if (!string.IsNullOrWhiteSpace(groupDto.CourseName))
                 {
@@ -220,16 +236,22 @@ namespace StudyGroup.Api.Controllers
                 return CreatedAtAction(nameof(GetById), new { id = groupId }, new 
                 { 
                     GroupId = groupId, 
-                    Message = "? Study group created successfully!",
+                    Message = "✅ Study group created successfully!",
+                    Membership = new
+                    {
+                        AutoJoined = true,
+                        Note = "🎉 You've been automatically added as a member of your group!"
+                    },
                     CreatorRights = new
                     {
-                        YourRole = "Group Creator",
+                        YourRole = "Group Creator & Member",
                         Permissions = new[]
                         {
-                            "? Update group details",
-                            "? Delete the group",
-                            "? Remove members from the group",
-                            "? Full management access"
+                            "✏️ Update group details",
+                            "🗑️ Delete the group",
+                            "👥 Remove members from the group",
+                            "🔧 Full management access",
+                            "💬 Participate in group activities"
                         }
                     },
                     AutoTagging = new

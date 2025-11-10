@@ -1,4 +1,6 @@
+C:\Professional software dev\StudyGroup\bin\Debug\net8.0\appsettings.Development.json
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\appsettings.json
+C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.staticwebassets.runtime.json
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.staticwebassets.endpoints.json
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.exe
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.deps.json
@@ -7,8 +9,10 @@ C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.pdb
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Azure.Core.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Azure.Identity.dll
+C:\Professional software dev\StudyGroup\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Dapper.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\HtmlAgilityPack.dll
+C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Microsoft.Data.SqlClient.dll
 C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
@@ -99,8 +103,5 @@ C:\Professional software dev\StudyGroup\obj\Debug\net8.0\refint\StudyGroup.Api.d
 C:\Professional software dev\StudyGroup\obj\Debug\net8.0\StudyGroup.Api.pdb
 C:\Professional software dev\StudyGroup\obj\Debug\net8.0\StudyGroup.Api.genruntimeconfig.cache
 C:\Professional software dev\StudyGroup\obj\Debug\net8.0\ref\StudyGroup.Api.dll
-C:\Professional software dev\StudyGroup\bin\Debug\net8.0\BCrypt.Net-Next.dll
-C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-C:\Professional software dev\StudyGroup\bin\Debug\net8.0\appsettings.Development.json
-C:\Professional software dev\StudyGroup\bin\Debug\net8.0\StudyGroup.Api.staticwebassets.runtime.json
-C:\Professional software dev\StudyGroup\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Professional software dev\StudyGroup\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Professional software dev\StudyGroup\bin\Debug\net8.0\System.Net.WebSockets.WebSocketProtocol.dll
