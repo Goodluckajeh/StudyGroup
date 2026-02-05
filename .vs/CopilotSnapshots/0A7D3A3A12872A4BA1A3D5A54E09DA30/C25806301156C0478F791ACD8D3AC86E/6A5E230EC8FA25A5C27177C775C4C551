@@ -1,0 +1,87 @@
+﻿// Custom Swagger UI JavaScript for StudyGroup API
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add authentication instructions
+    setTimeout(function() {
+        // Find the authorize button and add click handler
+        const authorizeBtn = document.querySelector('.auth-wrapper .authorize');
+        if (authorizeBtn) {
+            authorizeBtn.title = 'Click here to enter your JWT token after logging in';
+            
+            // Add helpful text near authorize button
+            const helpText = document.createElement('div');
+            helpText.innerHTML = '<small style="color: #dc3545; font-weight: bold;">⚠️ Login first with POST /api/users/login to get your token!</small>';
+            authorizeBtn.parentNode.appendChild(helpText);
+        }
+
+        // Add instructions to public endpoints
+        addPublicEndpointLabels();
+        
+        // Add authentication flow instructions
+        addAuthInstructions();
+        
+    }, 1000);
+});
+
+function addPublicEndpointLabels() {
+    // Find POST /api/users (registration) and POST /api/users/login
+    const operations = document.querySelectorAll('.opblock');
+    operations.forEach(op => {
+        const path = op.getAttribute('data-path');
+        const method = op.getAttribute('data-method');
+        
+        if ((path === '/api/users' && method === 'post') || 
+            (path === '/api/users/login' && method === 'post')) {
+            
+            const summary = op.querySelector('.opblock-summary-description');
+            if (summary && !summary.querySelector('.public-label')) {
+                const label = document.createElement('span');
+                label.className = 'public-label';
+                label.innerHTML = ' <strong style="color: #28a745;">🔓 PUBLIC ENDPOINT</strong>';
+                label.style.fontSize = '12px';
+                summary.appendChild(label);
+            }
+        }
+    });
+}
+
+function addAuthInstructions() {
+    // Add authentication flow instructions at the top
+    const infoSection = document.querySelector('.swagger-ui .info');
+    if (infoSection && !document.getElementById('auth-instructions')) {
+        const instructions = document.createElement('div');
+        instructions.id = 'auth-instructions';
+        instructions.innerHTML = `
+            <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <h4 style="color: #1976d2; margin-top: 0;">🚀 Quick Start Guide:</h4>
+                <ol style="margin: 10px 0;">
+                    <li><strong>Register:</strong> Use <code>POST /api/users</code> with your @principia.edu email</li>
+                    <li><strong>Login:</strong> Use <code>POST /api/users/login</code> to get your JWT token</li>
+                    <li><strong>Authorize:</strong> Click the <code>Authorize 🔓</code> button above and enter: <code>Bearer YOUR_TOKEN_HERE</code></li>
+                    <li><strong>Explore:</strong> Now you can access all other endpoints!</li>
+                </ol>
+                <p style="margin-bottom: 0; font-size: 14px; color: #666;">
+                    💡 <strong>Tip:</strong> The token expires in 60 minutes. Just login again to get a new one!
+                </p>
+            </div>
+        `;
+        infoSection.appendChild(instructions);
+    }
+}
+
+// Monitor for dynamic content updates
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList') {
+            addPublicEndpointLabels();
+        }
+    });
+});
+
+// Start observing
+setTimeout(() => {
+    const targetNode = document.querySelector('.swagger-ui');
+    if (targetNode) {
+        observer.observe(targetNode, { childList: true, subtree: true });
+    }
+}, 2000);

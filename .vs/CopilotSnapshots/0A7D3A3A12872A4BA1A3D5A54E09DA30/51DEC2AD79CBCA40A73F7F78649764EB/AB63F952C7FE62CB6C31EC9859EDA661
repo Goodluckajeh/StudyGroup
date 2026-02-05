@@ -1,0 +1,69 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for Tag endpoints
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TagsController : ControllerBase
+    {
+        private readonly ITagService _service;
+
+        // Injects the tag service
+        public TagsController(ITagService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/tags
+        // Returns all tags
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var tags = await _service.GetAllTagsAsync();
+            return Ok(tags);
+        }
+
+        // GET: api/tags/{id}
+        // Returns a tag by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var tag = await _service.GetTagByIdAsync(id);
+            if (tag == null) return NotFound();
+            return Ok(tag);
+        }
+
+        // POST: api/tags
+        // Creates a new tag
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Tag tag)
+        {
+            var id = await _service.CreateTagAsync(tag);
+            return CreatedAtAction(nameof(GetById), new { id }, tag);
+        }
+
+        // PUT: api/tags/{id}
+        // Updates an existing tag
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Tag tag)
+        {
+            tag.TagId = id;
+            var success = await _service.UpdateTagAsync(tag);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/tags/{id}
+        // Deletes a tag by ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteTagAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

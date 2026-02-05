@@ -1,0 +1,240 @@
+﻿using StudyGroup.Api.Services.Interfaces;
+using StudyGroup.Api.Settings;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Service.Interfaces;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace StudyGroup.Api.Services.Implementations
+{
+    /// <summary>
+    /// Centralized authentication service for the StudyGroup API.
+    /// Handles all JWT token operations, user authentication, and authorization logic.
+    /// MVP Version: Restricted to @principia.edu email addresses.
+    /// </summary>
+    public class AuthService : IAuthService
+    {
+        private readonly IUserService _userService;
+        private readonly JwtSettings _jwtSettings;
+        private const string ALLOWED_EMAIL_DOMAIN = "@principia.edu";
+
+        /// <summary>
+        /// Initializes a new instance of the AuthService.
+        /// </summary>
+        /// <param name="userService">The user service for user operations</param>
+        /// <param name="jwtOptions">JWT configuration settings</param>
+        public AuthService(IUserService userService, IOptions<JwtSettings> jwtOptions)
+        {
+            _userService = userService;
+            _jwtSettings = jwtOptions.Value;
+        }
+
+        /// <summary>
+        /// Authenticates a user by email and password and generates JWT token.
+        /// </summary>
+        /// <param name="email">The user's email address</param>
+        /// <param name="password">The user's password</param>
+        /// <returns>JWT token if authentication successful, null otherwise</returns>
+        public async Task<string?> AuthenticateAsync(string email, string password)
+        {
+            // Verify user credentials using the existing UserService
+            var user = await _userService.VerifyPasswordAsync(email, password);
+            if (user == null)
+                return null;
+
+            // Generate JWT token with user claims
+            return GenerateToken(user);
+        }
+
+        /// <summary>
+        /// Registers a new user with domain validation.
+        /// MVP RESTRICTION: Only allows registration with @principia.edu email addresses.
+        /// </summary>
+        /// <param name="model">The user registration data</param>
+        /// <returns>True if registration successful, false otherwise</returns>
+        public async Task<bool> RegisterAsync(CreateUserDto model)
+        {
+            try
+            {
+                // Validate email domain for MVP
+                if (!IsEmailDomainAllowed(model.Email))
+                {
+                    throw new InvalidOperationException($"Registration is currently limited to Principia College students and faculty. Please use your @principia.edu email address.");
+                }
+
+                // Use existing UserService to create user
+                var userId = await _userService.CreateUserAsync(model);
+                return userId > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Validates a JWT token and extracts user information.
+        /// </summary>
+        /// <param name="token">The JWT token to validate</param>
+        /// <returns>ClaimsPrincipal if token is valid, null otherwise</returns>
+        public ClaimsPrincipal? ValidateToken(string token)
+        {
+            try
+            {
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = true,
+                    ValidIssuer = _jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = _jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    RequireExpirationTime = true
+                };
+
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Extracts the user ID from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>User ID if found, null otherwise</returns>
+        public int? GetUserIdFromClaims(ClaimsPrincipal user)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : null;
+        }
+
+        /// <summary>
+        /// Extracts the user email from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>User email if found, null otherwise</returns>
+        public string? GetUserEmailFromClaims(ClaimsPrincipal user)
+        {
+            return user.FindFirst(ClaimTypes.Email)?.Value;
+        }
+
+        /// <summary>
+        /// Extracts the user's full name from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>User's full name if found, null otherwise</returns>
+        public string? GetUserNameFromClaims(ClaimsPrincipal user)
+        {
+            return user.FindFirst(ClaimTypes.Name)?.Value;
+        }
+
+        /// <summary>
+        /// Gets the current authenticated user's profile from JWT claims.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <returns>UserDto with basic user information from token claims</returns>
+        public UserDto? GetCurrentUserFromClaims(ClaimsPrincipal user)
+        {
+            var userId = GetUserIdFromClaims(user);
+            var email = GetUserEmailFromClaims(user);
+            var firstName = user.FindFirst("firstName")?.Value;
+            var lastName = user.FindFirst("lastName")?.Value;
+
+            if (userId == null || string.IsNullOrEmpty(email))
+                return null;
+
+            return new UserDto
+            {
+                UserId = userId.Value,
+                Email = email,
+                FirstName = firstName ?? string.Empty,
+                LastName = lastName ?? string.Empty,
+                // Note: Other properties would need to be fetched from database if needed
+                Skills = null,
+                Visibility = null,
+                Bio = null
+            };
+        }
+
+        /// <summary>
+        /// Checks if the current user can access data for a specific user ID.
+        /// </summary>
+        /// <param name="user">The current user's ClaimsPrincipal from JWT</param>
+        /// <param name="targetUserId">The user ID being accessed</param>
+        /// <returns>True if access is allowed, false otherwise</returns>
+        public bool CanAccessUserData(ClaimsPrincipal user, int targetUserId)
+        {
+            var currentUserId = GetUserIdFromClaims(user);
+            return currentUserId == targetUserId;
+        }
+
+        /// <summary>
+        /// Gets the token expiration time in hours.
+        /// </summary>
+        /// <returns>Expiration time in hours</returns>
+        public int GetTokenExpirationHours()
+        {
+            return _jwtSettings.ExpirationHours;
+        }
+
+        #region Private Helper Methods
+
+        /// <summary>
+        /// Validates that the email address belongs to the allowed domain for MVP.
+        /// </summary>
+        /// <param name="email">The email address to validate</param>
+        /// <returns>True if email domain is allowed, false otherwise</returns>
+        private bool IsEmailDomainAllowed(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return false;
+            return email.ToLowerInvariant().EndsWith(ALLOWED_EMAIL_DOMAIN.ToLowerInvariant());
+        }
+
+        /// <summary>
+        /// Generates a JWT token for the authenticated user.
+        /// Contains user ID, email, and name claims for authorization.
+        /// </summary>
+        /// <param name="user">The authenticated user data</param>
+        /// <returns>JWT token as a string</returns>
+        private string GenerateToken(UserDto user)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+                new Claim("firstName", user.FirstName),
+                new Claim("lastName", user.LastName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(_jwtSettings.ExpirationHours),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        #endregion
+    }
+}

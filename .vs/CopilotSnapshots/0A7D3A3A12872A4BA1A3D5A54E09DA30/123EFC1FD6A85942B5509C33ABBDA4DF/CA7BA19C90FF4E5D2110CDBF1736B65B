@@ -1,0 +1,47 @@
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.SqlQueries;
+
+namespace StudyGroup.Data.Repositories
+{
+    public class UserRepository : IUserRepository
+    {
+        private readonly IDbConnection _dbConnection;
+
+        public UserRepository(IDbConnection dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _dbConnection.QueryAsync<User>(UserSql.GetAll);
+        }
+
+        public async Task<User?> GetByIdAsync(int userId)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<User>(UserSql.GetById, new { UserId = userId });
+        }
+
+        public async Task<int> CreateAsync(User user)
+        {
+            return await _dbConnection.QuerySingleAsync<int>(UserSql.Insert, user);
+        }
+
+        public async Task<bool> UpdateAsync(User user)
+        {
+            var affected = await _dbConnection.ExecuteAsync(UserSql.Update, user);
+            return affected > 0;
+        }
+
+        public async Task<bool> DeleteAsync(int userId)
+        {
+            var affected = await _dbConnection.ExecuteAsync(UserSql.Delete, new { UserId = userId });
+            return affected > 0;
+        }
+    }
+}

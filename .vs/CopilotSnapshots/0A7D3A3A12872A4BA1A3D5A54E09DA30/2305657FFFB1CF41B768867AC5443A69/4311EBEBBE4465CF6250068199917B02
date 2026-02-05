@@ -1,0 +1,205 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Api.Services.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Authentication controller for user registration and login.
+    /// Handles JWT token generation for Principia College community.
+    /// Uses centralized AuthService for all authentication operations.
+    /// </summary>
+    [ApiController]  
+    [Route("api/[controller]")]
+    [AllowAnonymous] // All auth endpoints are public
+    public class AuthController : ControllerBase
+    {
+        private readonly IAuthService _authService;
+        private readonly IUserService _userService;
+
+        /// <summary>
+        /// Initializes a new instance of the AuthController.
+        /// </summary>
+        /// <param name="authService">The centralized authentication service</param>
+        /// <param name="userService">The user service for user operations</param>
+        public AuthController(IAuthService authService, IUserService userService)
+        {
+            _authService = authService;
+            _userService = userService;
+        }
+
+        /// <summary>
+        /// POST: api/auth/register
+        /// Registers a new user with @principia.edu email domain restriction.
+        /// The user account is immediately active and ready to use.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "firstName": "John",
+        ///   "lastName": "Doe",
+        ///   "email": "john.doe@principia.edu",
+        ///   "password": "SecurePassword123!",
+        ///   "skills": "Mathematics, Physics",
+        ///   "visibility": true,
+        ///   "bio": "Math major at Principia College"
+        /// }
+        /// </summary>
+        /// <param name="model">User registration data</param>
+        /// <returns>Success message if registration successful</returns>
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] CreateUserDto model)
+        {
+            try
+            {
+                var result = await _authService.RegisterAsync(model);
+                if (!result)
+                {
+                    return BadRequest(new { 
+                        Error = "Registration failed", 
+                        Message = "Please check your information and try again." 
+                    });
+                }
+
+                return Ok(new
+                {
+                    Message = "Registration successful! Welcome to the Principia College StudyGroup community.",
+                    Note = "You can now login to get your JWT token and start using the API.",
+                    NextStep = "Use POST /api/auth/login to authenticate and receive your token."
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { 
+                    Error = ex.Message,
+                    Code = "INVALID_EMAIL_DOMAIN",
+                    AllowedDomain = "@principia.edu"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { 
+                    Error = "Registration failed", 
+                    Details = ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/auth/login
+        /// Authenticates a user and returns a JWT token.
+        /// Token is required for accessing all other API endpoints.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "email": "john.doe@principia.edu",
+        ///   "password": "SecurePassword123!"
+        /// }
+        /// </summary>
+        /// <param name="model">Login credentials</param>
+        /// <returns>JWT token and user information if authentication successful</returns>
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto model)
+        {
+            try
+            {
+                var token = await _authService.AuthenticateAsync(model.Email, model.Password);
+                if (token == null)
+                {
+                    return Unauthorized(new { 
+                        Error = "Invalid email or password",
+                        Hint = "Make sure you're using your @principia.edu email address and correct password."
+                    });
+                }
+
+                // Get user information for response (since we have the password verified already)
+                var user = await _userService.VerifyPasswordAsync(model.Email, model.Password);
+
+                return Ok(new
+                {
+                    Message = "Login successful - Welcome to StudyGroup MVP!",
+                    Token = token,
+                    TokenType = "Bearer",
+                    ExpiresIn = $"{_authService.GetTokenExpirationHours()} hour(s)",
+                    User = user,
+                    Instructions = "Use this token in the Authorization header: 'Bearer {token}' for all API requests."
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { 
+                    Error = ex.Message,
+                    Code = "EMAIL_NOT_VERIFIED"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    Error = "Login failed", 
+                    Details = ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/auth/validate-token
+        /// Validates a JWT token and returns user information if valid.
+        /// This can be used by clients to check if their token is still valid.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        /// }
+        /// </summary>
+        /// <param name="request">Token validation request</param>
+        /// <returns>User information if token is valid, error if invalid</returns>
+        [HttpPost("validate-token")]
+        public IActionResult ValidateToken([FromBody] ValidateTokenRequest request)
+        {
+            try
+            {
+                var claimsPrincipal = _authService.ValidateToken(request.Token);
+                if (claimsPrincipal == null)
+                {
+                    return BadRequest(new { 
+                        Error = "Invalid token",
+                        Valid = false,
+                        Message = "The provided token is invalid, expired, or malformed."
+                    });
+                }
+
+                var userInfo = _authService.GetCurrentUserFromClaims(claimsPrincipal);
+                
+                return Ok(new
+                {
+                    Valid = true,
+                    Message = "Token is valid",
+                    User = userInfo,
+                    TokenInfo = new
+                    {
+                        UserId = _authService.GetUserIdFromClaims(claimsPrincipal),
+                        Email = _authService.GetUserEmailFromClaims(claimsPrincipal),
+                        Name = _authService.GetUserNameFromClaims(claimsPrincipal)
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { 
+                    Error = "Token validation failed",
+                    Valid = false,
+                    Details = ex.Message 
+                });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Request model for token validation endpoint.
+    /// </summary>
+    public class ValidateTokenRequest
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+}

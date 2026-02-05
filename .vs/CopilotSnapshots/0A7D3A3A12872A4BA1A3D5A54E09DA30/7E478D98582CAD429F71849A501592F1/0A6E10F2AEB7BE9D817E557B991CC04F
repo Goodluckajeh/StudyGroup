@@ -1,0 +1,43 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    public class UserService : IUserService
+    {
+        private readonly IUserRepository _repository;
+
+        public UserService(IUserRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _repository.GetByIdAsync(userId);
+        }
+
+        public async Task<int> CreateUserAsync(User user)
+        {
+            return await _repository.CreateAsync(user);
+        }
+
+        public async Task<bool> UpdateUserAsync(User user)
+        {
+            return await _repository.UpdateAsync(user);
+        }
+
+        public async Task<bool> DeleteUserAsync(int userId)
+        {
+            return await _repository.DeleteAsync(userId);
+        }
+    }
+}

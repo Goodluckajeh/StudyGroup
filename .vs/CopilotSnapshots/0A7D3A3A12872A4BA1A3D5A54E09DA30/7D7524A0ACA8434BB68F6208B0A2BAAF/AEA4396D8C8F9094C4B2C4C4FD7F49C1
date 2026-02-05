@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    // Contains SQL queries for Course entity CRUD operations
+    public static class CourseSql
+    {
+        public const string GetAll = @"SELECT * FROM courses";
+        public const string GetById = @"SELECT * FROM courses WHERE CourseId = @CourseId";
+        public const string Insert = @"INSERT INTO courses (CourseCode, CourseName, Description) VALUES (@CourseCode, @CourseName, @Description); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE courses SET CourseCode = @CourseCode, CourseName = @CourseName, Description = @Description WHERE CourseId = @CourseId";
+        public const string Delete = @"DELETE FROM courses WHERE CourseId = @CourseId";
+    }
+}

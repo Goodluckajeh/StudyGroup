@@ -1,0 +1,292 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Api.Services;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Simplified User API controller focused on essential user management functionality.
+    /// Provides endpoints for getting user info, updating profile, and changing password.
+    /// All operations require JWT authentication and enforce authorization (users can only modify their own data).
+    /// Includes comprehensive validation at both controller and service levels.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints
+    public class UsersController : ControllerBase
+    {
+        private readonly IUserService _service;
+        private readonly AutoTaggingService _autoTaggingService;
+
+        /// <summary>
+        /// Initializes a new instance of the UsersController.
+        /// </summary>
+        /// <param name="service">The user service for handling business logic</param>
+        /// <param name="autoTaggingService">The auto-tagging service for skill tag management</param>
+        public UsersController(IUserService service, AutoTaggingService autoTaggingService)
+        {
+            _service = service;
+            _autoTaggingService = autoTaggingService;
+        }
+
+        /// <summary>
+        /// Gets the current user ID from JWT claims.
+        /// </summary>
+        /// <returns>Current user ID or null if not found</returns>
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out int userId) ? userId : null;
+        }
+
+        #region Essential User Functionality
+
+        /// <summary>
+        /// GET: api/users/me
+        /// Gets the current authenticated user's profile information and user ID.
+        /// This is the primary endpoint for users to retrieve their own information.
+        /// </summary>
+        /// <returns>Current user's complete profile data including their user ID</returns>
+        [HttpGet("me")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var user = await _service.GetUserByIdAsync(currentUserId.Value);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(new
+            {
+                Message = "👤 Your Profile Information",
+                User = user,
+                UserId = user.UserId, // Explicitly highlight the user ID
+                Note = "This is your complete profile information including your unique user ID"
+            });
+        }
+
+        /// <summary>
+        /// GET: api/users/me/id
+        /// Gets just the current authenticated user's ID.
+        /// Lightweight endpoint for when you only need the user ID.
+        /// </summary>
+        /// <returns>The current user's ID</returns>
+        [HttpGet("me/id")]
+        public IActionResult GetMyUserId()
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            return Ok(new
+            {
+                Message = "🔢 Your User ID",
+                UserId = currentUserId.Value,
+                Note = "Use this ID for operations that require your user identifier"
+            });
+        }
+
+        /// <summary>
+        /// PUT: api/users/me
+        /// Updates the current authenticated user's profile information.
+        /// AUTOMATICALLY refreshes skill tags based on updated skills.
+        /// AUTHORIZATION: Users can only update their own profile.
+        /// VALIDATION: Includes both Data Annotations and business logic validation.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "firstName": "John",
+        ///   "lastName": "Doe Updated",
+        ///   "skills": "C#, ASP.NET Core, React, JavaScript",
+        ///   "visibility": true,
+        ///   "bio": "Updated bio - Full-stack developer and student"
+        /// }
+        /// </summary>
+        /// <param name="userDto">The updated user data (excludes password and email)</param>
+        /// <returns>Success message with automatic tag update summary</returns>
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserDto userDto)
+        {
+            // Step 1: Check for Data Annotations validation errors
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    Error = "Validation failed",
+                    ValidationErrors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
+                        ),
+                    Message = "Please correct the validation errors and try again"
+                });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            try
+            {
+                // Step 2: Update the user profile (includes service-level validation)
+                var success = await _service.UpdateUserAsync(currentUserId.Value, userDto);
+                if (!success) 
+                {
+                    return BadRequest(new { Error = "Failed to update profile" });
+                }
+
+                // Step 3: AUTOMATICALLY update skill tags (removes old, creates new)
+                var tagsCreated = await _autoTaggingService.UpdateUserSkillTagsAsync(currentUserId.Value, userDto.Skills);
+
+                // Parse skills for display
+                var skillsList = !string.IsNullOrEmpty(userDto.Skills) ? 
+                    userDto.Skills.Split(',').Select(s => s.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToArray() : 
+                    new string[0];
+
+                return Ok(new
+                {
+                    Message = "✅ Profile updated successfully!",
+                    UserId = currentUserId.Value,
+                    UpdatedData = new
+                    {
+                        FirstName = userDto.FirstName,
+                        LastName = userDto.LastName,
+                        Skills = skillsList,
+                        Visibility = userDto.Visibility,
+                        Bio = userDto.Bio
+                    },
+                    AutoTagging = new
+                    {
+                        SkillTagsRefreshed = true,
+                        NewSkillTagsCreated = tagsCreated,
+                        Note = tagsCreated > 0 ? 
+                            $"🏷️ {tagsCreated} skill tags refreshed - you're discoverable by matching study groups!" :
+                            "🧹 Skill tags cleared - add skills to become discoverable by study groups"
+                    },
+                    Validation = new
+                    {
+                        Status = "✅ All validation checks passed",
+                        Note = "Data Annotations and business logic validation completed successfully"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new 
+                { 
+                    Error = "Business logic validation failed", 
+                    Details = ex.Message,
+                    Note = "Please correct the issues and try again"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to update profile", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/users/me/change-password
+        /// Changes the current authenticated user's password after verifying their current password.
+        /// SECURITY: Users can ONLY change their own password - no admin overrides.
+        /// VALIDATION: Includes both Data Annotations and business logic validation.
+        /// The new password is automatically hashed before storage.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "currentPassword": "OldPassword123!",
+        ///   "newPassword": "NewSecurePassword456!",
+        ///   "confirmNewPassword": "NewSecurePassword456!"
+        /// }
+        /// </summary>
+        /// <param name="changePasswordDto">Current password and new password data</param>
+        /// <returns>Success message if changed, error if validation fails</returns>
+        [HttpPut("me/change-password")]
+        public async Task<IActionResult> ChangeMyPassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            // Step 1: Check for Data Annotations validation errors
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    Error = "Password validation failed",
+                    ValidationErrors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToArray()
+                        ),
+                    Message = "Please correct the password validation errors and try again"
+                });
+            }
+
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            try
+            {
+                // Step 2: Attempt to change password (includes service-level validation)
+                var success = await _service.ChangePasswordAsync(currentUserId.Value, 
+                    changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+                
+                if (!success)
+                {
+                    return BadRequest(new 
+                    { 
+                        Error = "Password change failed",
+                        Message = "Current password is incorrect",
+                        Note = "Please verify your current password and try again"
+                    });
+                }
+
+                return Ok(new 
+                { 
+                    Message = "🔐 Password changed successfully!",
+                    UserId = currentUserId.Value,
+                    Security = new
+                    {
+                        Note = "Your password has been securely updated",
+                        Recommendation = "Remember to use this new password for future logins"
+                    },
+                    Validation = new
+                    {
+                        Status = "✅ All password validation checks passed",
+                        SecurityLevel = "Strong password requirements enforced"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new 
+                { 
+                    Error = "Password validation failed", 
+                    Details = ex.Message,
+                    Note = "Please ensure your new password meets all security requirements"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to change password", Details = ex.Message });
+            }
+        }
+
+        #endregion
+    }
+}

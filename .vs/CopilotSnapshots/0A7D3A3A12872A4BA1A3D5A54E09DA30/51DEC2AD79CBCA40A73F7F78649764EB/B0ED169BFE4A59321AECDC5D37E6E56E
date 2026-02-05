@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IMembershipStatusService, contains business logic for membership statuses
+    public class MembershipStatusService : IMembershipStatusService
+    {
+        private readonly IMembershipStatusRepository _repository;
+
+        // Injects the membership status repository
+        public MembershipStatusService(IMembershipStatusRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Gets all membership statuses
+        public async Task<IEnumerable<MembershipStatus>> GetAllStatusesAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        // Gets a membership status by ID
+        public async Task<MembershipStatus?> GetStatusByIdAsync(int statusId)
+        {
+            return await _repository.GetByIdAsync(statusId);
+        }
+
+        // Creates a new membership status
+        public async Task<int> CreateStatusAsync(MembershipStatus status)
+        {
+            return await _repository.CreateAsync(status);
+        }
+
+        // Updates an existing membership status
+        public async Task<bool> UpdateStatusAsync(MembershipStatus status)
+        {
+            return await _repository.UpdateAsync(status);
+        }
+
+        // Deletes a membership status by ID
+        public async Task<bool> DeleteStatusAsync(int statusId)
+        {
+            return await _repository.DeleteAsync(statusId);
+        }
+    }
+}

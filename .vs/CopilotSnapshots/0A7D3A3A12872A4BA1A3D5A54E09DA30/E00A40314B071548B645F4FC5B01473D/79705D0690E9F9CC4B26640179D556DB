@@ -1,0 +1,205 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using StudyGroup.Api.Services.Interfaces;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for User endpoints with JWT authentication and authorization.
+    /// MVP Version: Restricted to Principia College (@principia.edu) email addresses only.
+    /// All endpoints require JWT authentication - use AuthController for registration/login.
+    /// Uses centralized AuthService for all authentication operations.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // All endpoints require authentication
+    public class UsersController : ControllerBase
+    {
+        private readonly IUserService _service;
+        private readonly IAuthService _authService;
+
+        /// <summary>
+        /// Initializes a new instance of the UsersController.
+        /// </summary>
+        /// <param name="service">The user service for handling business logic</param>
+        /// <param name="authService">The authentication service for JWT operations</param>
+        public UsersController(IUserService service, IAuthService authService)
+        {
+            _service = service;
+            _authService = authService;
+        }
+
+        /// <summary>
+        /// GET: api/users
+        /// Retrieves all users from the system.
+        /// Password hashes are excluded from the response for security.
+        /// AUTHORIZATION: Requires valid JWT token.
+        /// </summary>
+        /// <returns>List of all users without sensitive password data</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _service.GetAllUsersAsync();
+            return Ok(users);
+        }
+
+        /// <summary>
+        /// GET: api/users/{id}
+        /// Retrieves a specific user by their ID.
+        /// Password hash is excluded from the response for security.
+        /// AUTHORIZATION: Requires JWT token (public profile data).
+        /// </summary>
+        /// <param name="id">The unique identifier of the user</param>
+        /// <returns>The user details without sensitive data if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var user = await _service.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        /// <summary>
+        /// PUT: api/users/{id}
+        /// Updates an existing user's information.
+        /// Note: This endpoint does not update passwords or email addresses.
+        /// AUTHORIZATION: Users can only update their own profile. Requires JWT token.
+        /// </summary>
+        /// <param name="id">The ID of the user to update</param>
+        /// <param name="userDto">The updated user data (excluding password and email)</param>
+        /// <returns>NoContent if successful, NotFound if user doesn't exist, Forbid if not authorized</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto userDto)
+        {
+            // Authorization: Users can only update their own profile
+            if (!_authService.CanAccessUserData(User, id))
+            {
+                return Forbid("You can only update your own profile");
+            }
+
+            var success = await _service.UpdateUserAsync(id, userDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE: api/users/{id}
+        /// Deletes a user by their ID.
+        /// This will also cascade delete related group memberships.
+        /// AUTHORIZATION: Users can only delete their own account. Requires JWT token.
+        /// </summary>
+        /// <param name="id">The ID of the user to delete</param>
+        /// <returns>NoContent if successful, NotFound if user doesn't exist, Forbid if not authorized</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            // Authorization: Users can only delete their own account
+            if (!_authService.CanAccessUserData(User, id))
+            {
+                return Forbid("You can only delete your own account");
+            }
+
+            var success = await _service.DeleteUserAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// PUT: api/users/{id}/change-password
+        /// Changes a user's password after verifying their current password.
+        /// The new password is automatically hashed using BCrypt before storage.
+        /// AUTHORIZATION: Users can only change their own password. Requires JWT token.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "currentPassword": "OldPassword123!",
+        ///   "newPassword": "NewSecurePassword456!",
+        ///   "confirmNewPassword": "NewSecurePassword456!"
+        /// }
+        /// </summary>
+        /// <param name="id">The ID of the user changing their password</param>
+        /// <param name="changePasswordDto">The current and new password data</param>
+        /// <returns>Success message if changed, BadRequest if validation fails, Forbid if not authorized</returns>
+        [HttpPut("{id}/change-password")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDto changePasswordDto)
+        {
+            // Authorization: Users can only change their own password
+            if (!_authService.CanAccessUserData(User, id))
+            {
+                return Forbid("You can only change your own password");
+            }
+
+            // Validate that new passwords match
+            if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
+            {
+                return BadRequest(new { Error = "New password and confirmation do not match" });
+            }
+
+            // Validate password strength (optional - implement as needed)
+            if (changePasswordDto.NewPassword.Length < 6)
+            {
+                return BadRequest(new { Error = "New password must be at least 6 characters long" });
+            }
+
+            var success = await _service.ChangePasswordAsync(id, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            
+            if (!success)
+            {
+                return BadRequest(new { Error = "Current password is incorrect or user not found" });
+            }
+
+            return Ok(new { Message = "Password changed successfully" });
+        }
+
+        /// <summary>
+        /// GET: api/users/me
+        /// Gets the current authenticated user's profile information.
+        /// Uses JWT claims to identify the user and fetches full profile from database.
+        /// AUTHORIZATION: Requires valid JWT token.
+        /// </summary>
+        /// <returns>Current user's complete profile data</returns>
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var currentUserId = _authService.GetUserIdFromClaims(User);
+            if (currentUserId == null)
+            {
+                return Unauthorized("Invalid token - unable to identify user");
+            }
+
+            var user = await _service.GetUserByIdAsync(currentUserId.Value);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(user);
+        }
+
+        /// <summary>
+        /// GET: api/users/profile
+        /// Gets the current user's basic profile information from JWT claims only.
+        /// This is faster than /me as it doesn't require a database call.
+        /// AUTHORIZATION: Requires valid JWT token.
+        /// </summary>
+        /// <returns>Current user's basic profile data from JWT claims</returns>
+        [HttpGet("profile")]
+        public IActionResult GetCurrentUserProfile()
+        {
+            var userProfile = _authService.GetCurrentUserFromClaims(User);
+            if (userProfile == null)
+            {
+                return Unauthorized("Invalid token - unable to extract user information");
+            }
+
+            return Ok(new
+            {
+                Message = "User profile from JWT claims",
+                User = userProfile,
+                Note = "This data comes from the JWT token. Use GET /api/users/me for complete profile including bio, skills, etc."
+            });
+        }
+    }
+}

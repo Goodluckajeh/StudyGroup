@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    // Contains SQL queries for EntityType entity CRUD operations
+    public static class EntityTypeSql
+    {
+        public const string GetAll = @"SELECT * FROM entity_types";
+        public const string GetById = @"SELECT * FROM entity_types WHERE EntityTypeId = @EntityTypeId";
+        public const string Insert = @"INSERT INTO entity_types (EntityTypeName) VALUES (@EntityTypeName); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE entity_types SET EntityTypeName = @EntityTypeName WHERE EntityTypeId = @EntityTypeId";
+        public const string Delete = @"DELETE FROM entity_types WHERE EntityTypeId = @EntityTypeId";
+    }
+}

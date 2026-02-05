@@ -1,0 +1,89 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Api.Services;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Controller for administrative functions like data seeding.
+    /// Used to populate the system with initial reference data.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Requires authentication
+    public class AdminController : ControllerBase
+    {
+        private readonly DataSeedingService _seedingService;
+
+        public AdminController(DataSeedingService seedingService)
+        {
+            _seedingService = seedingService;
+        }
+
+        /// <summary>
+        /// POST: api/admin/seed-data
+        /// Seeds the database with common tags, courses, and membership statuses.
+        /// This is typically run once when setting up the system.
+        /// </summary>
+        [HttpPost("seed-data")]
+        public async Task<IActionResult> SeedData()
+        {
+            try
+            {
+                await _seedingService.SeedMembershipStatusesAsync();
+                await _seedingService.SeedTagsAsync();
+                await _seedingService.SeedCoursesAsync();
+
+                return Ok(new
+                {
+                    Message = "✅ Data seeding completed successfully!",
+                    SeededItems = new
+                    {
+                        Tags = "80+ academic and study-related tags",
+                        MembershipStatuses = "5 essential membership statuses",
+                        Courses = "50+ common college courses"
+                    },
+                    Timestamp = DateTime.UtcNow,
+                    NextSteps = new[]
+                    {
+                        "Check GET /api/tags to see available tags",
+                        "Check GET /api/courses to see available courses",
+                        "Check GET /api/membershipstatuses to see statuses"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Error = "Data seeding failed",
+                    Details = ex.Message,
+                    Suggestion = "Some data may already exist. Check individual endpoints to verify."
+                });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/admin/seed-tags-only
+        /// Seeds only the tags table with common academic and study tags.
+        /// </summary>
+        [HttpPost("seed-tags-only")]
+        public async Task<IActionResult> SeedTagsOnly()
+        {
+            try
+            {
+                await _seedingService.SeedTagsAsync();
+                return Ok(new
+                {
+                    Message = "✅ Tags seeded successfully!",
+                    Note = "80+ academic and study-related tags have been added",
+                    ViewTags = "GET /api/tags"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Tag seeding failed", Details = ex.Message });
+            }
+        }
+    }
+}

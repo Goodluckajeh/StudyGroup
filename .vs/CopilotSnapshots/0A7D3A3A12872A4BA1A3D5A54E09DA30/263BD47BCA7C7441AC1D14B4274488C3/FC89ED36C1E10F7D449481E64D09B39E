@@ -1,0 +1,146 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Api.Services.Interfaces;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Test controller to debug authentication issues.
+    /// Shows what information is available after JWT authentication.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TestController : ControllerBase
+    {
+        private readonly IAuthService _authService;
+
+        public TestController(IAuthService authService)
+        {
+            _authService = authService;
+        }
+
+        /// <summary>
+        /// GET: api/test/public
+        /// Public endpoint that doesn't require authentication.
+        /// </summary>
+        [HttpGet("public")]
+        [AllowAnonymous]
+        public IActionResult Public()
+        {
+            return Ok(new
+            {
+                Message = "✅ PUBLIC ENDPOINT WORKING - API is running correctly",
+                Timestamp = DateTime.UtcNow,
+                Instructions = new[]
+                {
+                    "1. Register: POST /api/auth/register",
+                    "2. Login: POST /api/auth/login", 
+                    "3. Copy token from login response",
+                    "4. Use 'Bearer {token}' in Authorization header",
+                    "5. Test: GET /api/test/protected"
+                }
+            });
+        }
+
+        /// <summary>
+        /// GET: api/test/auth-debug
+        /// Shows authentication details for debugging.
+        /// </summary>
+        [HttpGet("auth-debug")]
+        [AllowAnonymous]
+        public IActionResult AuthDebug()
+        {
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            var hasAuthHeader = !string.IsNullOrEmpty(authHeader);
+            var tokenFormat = hasAuthHeader ? (authHeader.StartsWith("Bearer ") ? "Correct" : "Wrong Format") : "Missing";
+            
+            return Ok(new
+            {
+                Message = "🔍 AUTHENTICATION DEBUG INFO",
+                AuthenticationDetails = new
+                {
+                    HasAuthorizationHeader = hasAuthHeader,
+                    AuthorizationHeader = authHeader?.Substring(0, Math.Min(50, authHeader.Length ?? 0)) + "...",
+                    TokenFormat = tokenFormat,
+                    IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                    AuthenticationType = User.Identity?.AuthenticationType,
+                    ClaimsCount = User.Claims?.Count() ?? 0
+                },
+                Instructions = hasAuthHeader ? 
+                    (tokenFormat == "Correct" ? 
+                        "✅ Token format looks correct - try protected endpoint" : 
+                        "❌ Use format: 'Bearer {your-token-here}'") :
+                    "❌ Missing Authorization header - add 'Bearer {your-token-here}'"
+            });
+        }
+
+        /// <summary>
+        /// GET: api/test/protected
+        /// Protected endpoint that requires JWT authentication.
+        /// Shows what information is available from the JWT token.
+        /// </summary>
+        [HttpGet("protected")]
+        [Authorize]
+        public IActionResult Protected()
+        {
+            var userId = _authService.GetUserIdFromClaims(User);
+            var email = _authService.GetUserEmailFromClaims(User);
+            var name = _authService.GetUserNameFromClaims(User);
+            var userProfile = _authService.GetCurrentUserFromClaims(User);
+
+            return Ok(new
+            {
+                Message = "🎉 AUTHENTICATION SUCCESS - You have access to protected endpoints!",
+                Timestamp = DateTime.UtcNow,
+                UserInfo = new
+                {
+                    UserId = userId,
+                    Email = email,
+                    Name = name,
+                    IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                    AuthenticationType = User.Identity?.AuthenticationType
+                },
+                UserProfile = userProfile,
+                AvailableEndpoints = new[]
+                {
+                    "✅ GET /api/users - List all users",
+                    "✅ GET /api/users/me - Your profile", 
+                    "✅ GET /api/studygroups - List all study groups",
+                    "✅ GET /api/courses - List all courses",
+                    "✅ POST /api/studygroups - Create a study group",
+                    "✅ All other protected endpoints now work!"
+                },
+                NextSteps = new[]
+                {
+                    "Try: GET /api/users/me",
+                    "Try: GET /api/users", 
+                    "Try: GET /api/studygroups"
+                }
+            });
+        }
+
+        /// <summary>
+        /// GET: api/test/claims
+        /// Shows all JWT claims for debugging purposes.
+        /// </summary>
+        [HttpGet("claims")]
+        [Authorize]
+        public IActionResult Claims()
+        {
+            return Ok(new
+            {
+                Message = "🔍 JWT TOKEN CLAIMS DEBUG",
+                IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                AuthenticationType = User.Identity?.AuthenticationType,
+                Name = User.Identity?.Name,
+                ClaimsCount = User.Claims.Count(),
+                Claims = User.Claims.Select(c => new 
+                { 
+                    Type = c.Type, 
+                    Value = c.Value,
+                    Issuer = c.Issuer
+                }).ToList()
+            });
+        }
+    }
+}

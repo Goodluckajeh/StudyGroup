@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Service.Interfaces
+{
+    // Interface for MembershipStatus service, defines business logic methods
+    public interface IMembershipStatusService
+    {
+        Task<IEnumerable<MembershipStatus>> GetAllStatusesAsync();
+        Task<MembershipStatus?> GetStatusByIdAsync(int statusId);
+        Task<int> CreateStatusAsync(MembershipStatus status);
+        Task<bool> UpdateStatusAsync(MembershipStatus status);
+        Task<bool> DeleteStatusAsync(int statusId);
+    }
+}

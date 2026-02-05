@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IEntityTypeService, contains business logic for entity types
+    public class EntityTypeService : IEntityTypeService
+    {
+        private readonly IEntityTypeRepository _repository;
+
+        // Injects the entity type repository
+        public EntityTypeService(IEntityTypeRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Gets all entity types
+        public async Task<IEnumerable<EntityType>> GetAllEntityTypesAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        // Gets an entity type by ID
+        public async Task<EntityType?> GetEntityTypeByIdAsync(int entityTypeId)
+        {
+            return await _repository.GetByIdAsync(entityTypeId);
+        }
+
+        // Creates a new entity type
+        public async Task<int> CreateEntityTypeAsync(EntityType entityType)
+        {
+            return await _repository.CreateAsync(entityType);
+        }
+
+        // Updates an existing entity type
+        public async Task<bool> UpdateEntityTypeAsync(EntityType entityType)
+        {
+            return await _repository.UpdateAsync(entityType);
+        }
+
+        // Deletes an entity type by ID
+        public async Task<bool> DeleteEntityTypeAsync(int entityTypeId)
+        {
+            return await _repository.DeleteAsync(entityTypeId);
+        }
+    }
+}

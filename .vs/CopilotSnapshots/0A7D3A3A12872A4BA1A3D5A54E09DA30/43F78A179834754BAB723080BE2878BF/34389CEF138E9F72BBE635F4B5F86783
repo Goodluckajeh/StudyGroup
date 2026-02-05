@@ -1,0 +1,344 @@
+﻿using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Services
+{
+    /// <summary>
+    /// Service for automatically managing tags based on user skills and study group courses.
+    /// Handles the creation and synchronization of tags when users update skills or study groups are created.
+    /// </summary>
+    public class AutoTaggingService
+    {
+        private readonly ITagService _tagService;
+        private readonly IEntityTypeService _entityTypeService;
+
+        public AutoTaggingService(ITagService tagService, IEntityTypeService entityTypeService)
+        {
+            _tagService = tagService;
+            _entityTypeService = entityTypeService;
+        }
+
+        /// <summary>
+        /// Gets the entity type ID for "User" entities.
+        /// </summary>
+        private async Task<int?> GetUserEntityTypeIdAsync()
+        {
+            var entityTypes = await _entityTypeService.GetAllEntityTypesAsync();
+            var userEntityType = entityTypes.FirstOrDefault(et => 
+                et.EntityTypeName.Equals("User", StringComparison.OrdinalIgnoreCase));
+            return userEntityType?.EntityTypeId;
+        }
+
+        /// <summary>
+        /// Gets the entity type ID for "StudyGroup" entities.
+        /// </summary>
+        private async Task<int?> GetStudyGroupEntityTypeIdAsync()
+        {
+            var entityTypes = await _entityTypeService.GetAllEntityTypesAsync();
+            var studyGroupEntityType = entityTypes.FirstOrDefault(et => 
+                et.EntityTypeName.Equals("StudyGroup", StringComparison.OrdinalIgnoreCase) ||
+                et.EntityTypeName.Equals("Study Group", StringComparison.OrdinalIgnoreCase));
+            return studyGroupEntityType?.EntityTypeId;
+        }
+
+        /// <summary>
+        /// Updates tags for a user based on their skills.
+        /// Removes old skill tags and creates new ones.
+        /// </summary>
+        /// <param name="userId">The user ID</param>
+        /// <param name="skills">Comma-separated skills string</param>
+        public async Task<bool> UpdateUserSkillTagsAsync(int userId, string? skills)
+        {
+            try
+            {
+                var userEntityTypeId = await GetUserEntityTypeIdAsync();
+                if (userEntityTypeId == null)
+                {
+                    Console.WriteLine("❌ No 'User' entity type found in EntityType table");
+                    return false;
+                }
+
+                // Remove existing skill tags for this user
+                await RemoveTagsForEntityAsync(userId, userEntityTypeId.Value);
+
+                // If no skills provided, we're done
+                if (string.IsNullOrWhiteSpace(skills))
+                {
+                    Console.WriteLine($"✅ Cleared all skill tags for user {userId}");
+                    return true;
+                }
+
+                // Parse skills and create tags
+                var skillList = ParseSkills(skills);
+                Console.WriteLine($"🏷️ Creating {skillList.Count} skill tags for user {userId}: {string.Join(", ", skillList)}");
+                
+                foreach (var skill in skillList)
+                {
+                    await CreateTagAsync(skill.Trim(), userEntityTypeId.Value, userId);
+                }
+
+                Console.WriteLine($"✅ Successfully created skill tags for user {userId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error updating skill tags for user {userId}: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Updates tags for a study group based on its course.
+        /// </summary>
+        /// <param name="studyGroupId">The study group ID</param>
+        /// <param name="courseName">The course name</param>
+        public async Task<bool> UpdateStudyGroupCourseTagsAsync(int studyGroupId, string courseName)
+        {
+            try
+            {
+                var studyGroupEntityTypeId = await GetStudyGroupEntityTypeIdAsync();
+                if (studyGroupEntityTypeId == null)
+                {
+                    Console.WriteLine("❌ No 'StudyGroup' entity type found in EntityType table");
+                    return false;
+                }
+
+                // Remove existing course tags for this study group
+                await RemoveTagsForEntityAsync(studyGroupId, studyGroupEntityTypeId.Value);
+
+                // Create tags based on course name
+                var courseTags = ParseCourseTags(courseName);
+                Console.WriteLine($"🏷️ Creating {courseTags.Count} course tags for study group {studyGroupId}: {string.Join(", ", courseTags)}");
+                
+                foreach (var tag in courseTags)
+                {
+                    await CreateTagAsync(tag.Trim(), studyGroupEntityTypeId.Value, studyGroupId);
+                }
+
+                Console.WriteLine($"✅ Successfully created course tags for study group {studyGroupId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error updating course tags for study group {studyGroupId}: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Finds study groups that match a user's skill tags.
+        /// </summary>
+        /// <param name="userId">The user ID</param>
+        /// <returns>List of study group IDs that match user's skills</returns>
+        public async Task<IEnumerable<int>> FindMatchingStudyGroupsAsync(int userId)
+        {
+            try
+            {
+                var userEntityTypeId = await GetUserEntityTypeIdAsync();
+                var studyGroupEntityTypeId = await GetStudyGroupEntityTypeIdAsync();
+                
+                if (userEntityTypeId == null || studyGroupEntityTypeId == null)
+                {
+                    Console.WriteLine("❌ Missing entity types for matching");
+                    return new List<int>();
+                }
+
+                // Get user's skill tags
+                var userTags = await _tagService.GetTagsByEntityAsync(userEntityTypeId.Value, userId);
+                var userSkills = userTags.Select(t => t.Name.ToLowerInvariant()).ToHashSet();
+
+                if (!userSkills.Any())
+                {
+                    Console.WriteLine($"📭 No skill tags found for user {userId}");
+                    return new List<int>();
+                }
+
+                // Get all study group tags
+                var allStudyGroupTags = await _tagService.GetTagsByEntityTypeAsync(studyGroupEntityTypeId.Value);
+
+                // Find study groups with matching tags
+                var matchingGroupIds = allStudyGroupTags
+                    .Where(tag => userSkills.Contains(tag.Name.ToLowerInvariant()))
+                    .Select(tag => tag.EntityId)
+                    .Distinct()
+                    .ToList();
+
+                Console.WriteLine($"🎯 Found {matchingGroupIds.Count} matching study groups for user {userId}");
+                return matchingGroupIds;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error finding matching study groups for user {userId}: {ex.Message}");
+                return new List<int>();
+            }
+        }
+
+        /// <summary>
+        /// Finds users that have skills matching a study group's course tags.
+        /// </summary>
+        /// <param name="studyGroupId">The study group ID</param>
+        /// <returns>List of user IDs with matching skills</returns>
+        public async Task<IEnumerable<int>> FindUsersWithMatchingSkillsAsync(int studyGroupId)
+        {
+            try
+            {
+                var userEntityTypeId = await GetUserEntityTypeIdAsync();
+                var studyGroupEntityTypeId = await GetStudyGroupEntityTypeIdAsync();
+                
+                if (userEntityTypeId == null || studyGroupEntityTypeId == null)
+                {
+                    return new List<int>();
+                }
+
+                // Get study group's course tags
+                var groupTags = await _tagService.GetTagsByEntityAsync(studyGroupEntityTypeId.Value, studyGroupId);
+                var courseTopics = groupTags.Select(t => t.Name.ToLowerInvariant()).ToHashSet();
+
+                if (!courseTopics.Any())
+                    return new List<int>();
+
+                // Get all user skill tags
+                var allUserTags = await _tagService.GetTagsByEntityTypeAsync(userEntityTypeId.Value);
+
+                // Find users with matching skills
+                var matchingUserIds = allUserTags
+                    .Where(tag => courseTopics.Contains(tag.Name.ToLowerInvariant()))
+                    .Select(tag => tag.EntityId)
+                    .Distinct()
+                    .ToList();
+
+                return matchingUserIds;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error finding matching users for study group {studyGroupId}: {ex.Message}");
+                return new List<int>();
+            }
+        }
+
+        #region Private Helper Methods
+
+        /// <summary>
+        /// Parses a comma-separated skills string into individual skills.
+        /// </summary>
+        private List<string> ParseSkills(string skills)
+        {
+            return skills.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .ToList();
+        }
+
+        /// <summary>
+        /// Parses a course name to extract relevant tags.
+        /// </summary>
+        private List<string> ParseCourseTags(string courseName)
+        {
+            var tags = new List<string>();
+
+            // Add the full course name as a tag
+            tags.Add(courseName);
+
+            // Extract subject keywords
+            var courseWords = courseName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            
+            // Subject mapping - add more as needed
+            var subjectMappings = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Psychology", new List<string> {"Psychology", "Social Science"}},
+                {"Biology", new List<string> {"Biology", "Life Science", "Science"}},
+                {"Chemistry", new List<string> {"Chemistry", "Physical Science", "Science"}},
+                {"Physics", new List<string> {"Physics", "Physical Science", "Science"}},
+                {"Calculus", new List<string> {"Calculus", "Mathematics", "Math"}},
+                {"Algebra", new List<string> {"Algebra", "Mathematics", "Math"}},
+                {"Statistics", new List<string> {"Statistics", "Mathematics", "Math", "Data Analysis"}},
+                {"Computer", new List<string> {"Computer Science", "Programming", "Technology"}},
+                {"Programming", new List<string> {"Programming", "Computer Science", "Technology"}},
+                {"History", new List<string> {"History", "Social Science"}},
+                {"English", new List<string> {"English", "Literature", "Writing"}},
+                {"Literature", new List<string> {"Literature", "English", "Reading"}},
+                {"Art", new List<string> {"Art", "Creative Arts", "Visual Arts"}},
+                {"Music", new List<string> {"Music", "Performing Arts"}},
+                {"Theatre", new List<string> {"Theatre", "Performing Arts", "Drama"}},
+                {"Economics", new List<string> {"Economics", "Business", "Social Science"}},
+                {"Business", new List<string> {"Business", "Management", "Economics"}},
+                {"Philosophy", new List<string> {"Philosophy", "Critical Thinking"}}
+            };
+
+            // Add level indicators
+            foreach (var word in courseWords)
+            {
+                if (word.Equals("Introduction", StringComparison.OrdinalIgnoreCase) || 
+                    word.Equals("Intro", StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.Add("Beginner");
+                    tags.Add("Introduction");
+                }
+                else if (word.Equals("Advanced", StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.Add("Advanced");
+                }
+                else if (word.Equals("Intermediate", StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.Add("Intermediate");
+                }
+
+                // Check if word matches a subject
+                foreach (var mapping in subjectMappings)
+                {
+                    if (word.Contains(mapping.Key, StringComparison.OrdinalIgnoreCase))
+                    {
+                        tags.AddRange(mapping.Value);
+                    }
+                }
+            }
+
+            return tags.Distinct().ToList();
+        }
+
+        /// <summary>
+        /// Creates a tag for an entity, avoiding duplicates.
+        /// </summary>
+        private async Task CreateTagAsync(string name, int entityTypeId, int entityId)
+        {
+            try
+            {
+                var createTagDto = new CreateTagDto
+                {
+                    Name = name,
+                    EntityTypeId = entityTypeId,
+                    EntityId = entityId
+                };
+
+                await _tagService.CreateTagAsync(createTagDto);
+                Console.WriteLine($"  ✅ Created tag: '{name}' for entity {entityId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ⚠️ Failed to create tag '{name}': {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Removes all tags for a specific entity.
+        /// </summary>
+        private async Task RemoveTagsForEntityAsync(int entityId, int entityTypeId)
+        {
+            try
+            {
+                var existingTags = await _tagService.GetTagsByEntityAsync(entityTypeId, entityId);
+                foreach (var tag in existingTags)
+                {
+                    await _tagService.DeleteTagAsync(tag.TagId);
+                    Console.WriteLine($"  🗑️ Removed tag: '{tag.Name}' from entity {entityId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ❌ Error removing tags for entity {entityId}: {ex.Message}");
+            }
+        }
+
+        #endregion
+    }
+}

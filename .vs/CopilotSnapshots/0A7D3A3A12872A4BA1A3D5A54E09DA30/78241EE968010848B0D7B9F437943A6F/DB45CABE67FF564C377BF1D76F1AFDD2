@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Data.Interfaces
+{
+    // Interface for DayOfWeek repository, defines CRUD operations
+    public interface IDayOfWeekRepository
+    {
+        Task<IEnumerable<DayOfWeek>> GetAllAsync();
+        Task<DayOfWeek?> GetByIdAsync(int dayId);
+        Task<int> CreateAsync(DayOfWeek day);
+        Task<bool> UpdateAsync(DayOfWeek day);
+        Task<bool> DeleteAsync(int dayId);
+    }
+}

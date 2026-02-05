@@ -1,0 +1,8 @@
+﻿namespace StudyGroup.Data.Models
+{
+    public class MembershipStatus
+    {
+        public int status_id { get; set; }
+        public string status_name { get; set; } = string.Empty;
+    }
+}

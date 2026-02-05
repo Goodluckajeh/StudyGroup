@@ -1,0 +1,191 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.Services;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Repositories;
+using StudyGroup.Service.Settings;
+using StudyGroup.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+    );
+
+// Configure JWT Settings
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// Configure Swagger/OpenAPI with JWT Authentication
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "StudyGroup API", 
+        Version = "v1",
+        Description = "StudyGroup API with JWT Authentication and Smart Tag Matching. Use /api/auth/login to get JWT token."
+    });
+
+    // Add JWT Authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header. You can enter just the token or 'Bearer {token}'.\n\nExamples:\n- Just token: \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n- With Bearer: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+});
+
+// Register Dapper's IDbConnection
+builder.Services.AddScoped<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Authentication Service
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Register Auto-Tagging Service for skill/course tag management
+builder.Services.AddScoped<AutoTaggingService>();
+
+// JWT Authentication setup with flexible token handling
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var jwtKey = jwtSection["Key"];
+var issuer = jwtSection["Issuer"];
+var audience = jwtSection["Audience"];
+
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("JWT Key not configured");
+}
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false; // Set to true in production
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+
+    // Flexible token handling - accepts tokens with or without "Bearer" prefix
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+            
+            if (!string.IsNullOrEmpty(authHeader))
+            {
+                // Handle tokens with or without "Bearer " prefix
+                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Standard format: "Bearer {token}"
+                    context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                }
+                else if (authHeader.StartsWith("eyJ")) // JWT tokens typically start with "eyJ"
+                {
+                    // Direct token format: "{token}"
+                    context.Token = authHeader;
+                }
+            }
+            
+            return Task.CompletedTask;
+        }
+    };
+});
+
+// Authorization configuration
+builder.Services.AddAuthorization();
+
+// Register repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IStudyGroupRepository, StudyGroupRepository>();
+builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<IEntityTypeRepository, EntityTypeRepository>();
+
+// Register services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+
+// StudyGroupService with CourseRepository dependency
+builder.Services.AddScoped<IStudyGroupService>(provider => 
+    new StudyGroupService(
+        provider.GetRequiredService<IStudyGroupRepository>(),
+        provider.GetRequiredService<ICourseRepository>()
+    ));
+
+builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IEntityTypeService, EntityTypeService>();
+
+// ----------------------
+// Build app
+// ----------------------
+var app = builder.Build();
+
+// Configure HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyGroup API v1");
+        c.DocumentTitle = "StudyGroup API - Smart Tag Matching";
+        c.DefaultModelsExpandDepth(-1);
+        c.DisplayRequestDuration();
+    });
+}
+
+app.UseHttpsRedirection();
+
+// Add Authentication and Authorization middleware (ORDER MATTERS!)
+app.UseAuthentication(); // Must come before UseAuthorization
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

@@ -1,0 +1,11 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    public static class StudyGroupSql
+    {
+        public const string GetAll = @"SELECT * FROM study_groups";
+        public const string GetById = @"SELECT * FROM study_groups WHERE GroupId = @GroupId";
+        public const string Insert = @"INSERT INTO study_groups (CourseId, CreatorId, Topic, TimeSlot, Description) VALUES (@CourseId, @CreatorId, @Topic, @TimeSlot, @Description); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE study_groups SET CourseId = @CourseId, CreatorId = @CreatorId, Topic = @Topic, TimeSlot = @TimeSlot, Description = @Description WHERE GroupId = @GroupId";
+        public const string Delete = @"DELETE FROM study_groups WHERE GroupId = @GroupId";
+    }
+}

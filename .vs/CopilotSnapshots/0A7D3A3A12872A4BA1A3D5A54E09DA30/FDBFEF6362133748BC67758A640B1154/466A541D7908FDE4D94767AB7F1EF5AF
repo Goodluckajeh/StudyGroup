@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Service.Interfaces
+{
+    // Interface for EntityType service, defines business logic methods
+    public interface IEntityTypeService
+    {
+        Task<IEnumerable<EntityType>> GetAllEntityTypesAsync();
+        Task<EntityType?> GetEntityTypeByIdAsync(int entityTypeId);
+        Task<int> CreateEntityTypeAsync(EntityType entityType);
+        Task<bool> UpdateEntityTypeAsync(EntityType entityType);
+        Task<bool> DeleteEntityTypeAsync(int entityTypeId);
+    }
+}

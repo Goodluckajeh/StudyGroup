@@ -1,0 +1,122 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for StudyGroup endpoints.
+    /// Allows users to create study groups using course names instead of IDs for better usability.
+    /// Open API - no authentication required.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class StudyGroupsController : ControllerBase
+    {
+        private readonly IStudyGroupService _service;
+
+        /// <summary>
+        /// Initializes a new instance of the StudyGroupsController.
+        /// </summary>
+        /// <param name="service">The study group service for handling business logic</param>
+        public StudyGroupsController(IStudyGroupService service)
+        {
+            _service = service;
+        }
+
+        /// <summary>
+        /// GET: api/studygroups
+        /// Retrieves all study groups with course names included for display.
+        /// </summary>
+        /// <returns>List of all study groups with their associated course information</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var groups = await _service.GetAllGroupsAsync();
+            return Ok(groups);
+        }
+
+        /// <summary>
+        /// GET: api/studygroups/{id}
+        /// Retrieves a specific study group by ID with course name included.
+        /// </summary>
+        /// <param name="id">The unique identifier of the study group</param>
+        /// <returns>The study group details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var group = await _service.GetGroupByIdAsync(id);
+            if (group == null) return NotFound();
+            return Ok(group);
+        }
+
+        /// <summary>
+        /// POST: api/studygroups
+        /// Creates a new study group using course name instead of course ID.
+        /// This is much more user-friendly as users know course names but not database IDs.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "courseName": "Introduction to Psychology",
+        ///   "creatorId": 123,
+        ///   "topic": "Midterm Exam Preparation",
+        ///   "timeSlot": "Tuesdays 6-8 PM",
+        ///   "description": "Study group for Psychology 101 midterm..."
+        /// }
+        /// </summary>
+        /// <param name="groupDto">The study group data with course name</param>
+        /// <returns>The created study group with its new ID</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateStudyGroupDto groupDto)
+        {
+            try
+            {
+                var id = await _service.CreateGroupAsync(groupDto);
+                return CreatedAtAction(nameof(GetById), new { id }, new { GroupId = id, Message = "Study group created successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle course not found errors with user-friendly messages
+                return BadRequest(new { Error = ex.Message, Suggestion = "Please check the course name and ensure it exists in the system" });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/studygroups/{id}
+        /// Updates an existing study group using course name instead of course ID.
+        /// </summary>
+        /// <param name="id">The ID of the study group to update</param>
+        /// <param name="groupDto">The updated study group data with course name</param>
+        /// <returns>NoContent if successful, NotFound if group doesn't exist, BadRequest if course name invalid</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateStudyGroupDto groupDto)
+        {
+            try
+            {
+                var success = await _service.UpdateGroupAsync(id, groupDto);
+                if (!success) return NotFound("Study group not found");
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle course not found errors with user-friendly messages
+                return BadRequest(new { Error = ex.Message, Suggestion = "Please check the course name and ensure it exists in the system" });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/studygroups/{id}
+        /// Deletes a study group by its ID.
+        /// Note: This will also remove all associated group memberships due to CASCADE DELETE.
+        /// </summary>
+        /// <param name="id">The ID of the study group to delete</param>
+        /// <returns>NoContent if successful, NotFound if group doesn't exist</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteGroupAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

@@ -1,0 +1,175 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for User endpoints.
+    /// MVP Version: Open API - no authentication required.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class UsersController : ControllerBase
+    {
+        private readonly IUserService _service;
+
+        /// <summary>
+        /// Initializes a new instance of the UsersController.
+        /// </summary>
+        /// <param name="service">The user service for handling business logic</param>
+        public UsersController(IUserService service)
+        {
+            _service = service;
+        }
+
+        /// <summary>
+        /// GET: api/users
+        /// Retrieves all users from the system.
+        /// Password hashes are excluded from the response for security.
+        /// </summary>
+        /// <returns>List of all users without sensitive password data</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _service.GetAllUsersAsync();
+            return Ok(users);
+        }
+
+        /// <summary>
+        /// GET: api/users/{id}
+        /// Retrieves a specific user by their ID.
+        /// Password hash is excluded from the response for security.
+        /// </summary>
+        /// <param name="id">The unique identifier of the user</param>
+        /// <returns>The user details without sensitive data if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var user = await _service.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        /// <summary>
+        /// POST: api/users
+        /// Creates a new user with a securely hashed password using BCrypt.
+        /// The user account is immediately active and ready to use.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "firstName": "John",
+        ///   "lastName": "Doe", 
+        ///   "email": "john.doe@principia.edu",
+        ///   "password": "SecurePassword123!",
+        ///   "skills": "JavaScript, C#, React",
+        ///   "visibility": true,
+        ///   "bio": "Computer Science student at Principia College"
+        /// }
+        /// </summary>
+        /// <param name="userDto">The user data including plain text password</param>
+        /// <returns>The created user details (without password hash)</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateUserDto userDto)
+        {
+            try
+            {
+                var id = await _service.CreateUserAsync(userDto);
+                
+                // Get the created user
+                var createdUser = await _service.GetUserByIdAsync(id);
+                if (createdUser == null)
+                {
+                    return BadRequest(new { Error = "Failed to retrieve created user" });
+                }
+
+                return CreatedAtAction(nameof(GetById), new { id }, new
+                {
+                    User = createdUser,
+                    Message = "User created successfully! Welcome to the Principia College StudyGroup community."
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle duplicate email or domain restriction violations
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Handle potential errors
+                return BadRequest(new { Error = "Failed to create user", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT: api/users/{id}
+        /// Updates an existing user's information.
+        /// Note: This endpoint does not update passwords or email addresses.
+        /// </summary>
+        /// <param name="id">The ID of the user to update</param>
+        /// <param name="userDto">The updated user data (excluding password and email)</param>
+        /// <returns>NoContent if successful, NotFound if user doesn't exist</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto userDto)
+        {
+            var success = await _service.UpdateUserAsync(id, userDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE: api/users/{id}
+        /// Deletes a user by their ID.
+        /// This will also cascade delete related group memberships.
+        /// </summary>
+        /// <param name="id">The ID of the user to delete</param>
+        /// <returns>NoContent if successful, NotFound if user doesn't exist</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteUserAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// PUT: api/users/{id}/change-password
+        /// Changes a user's password after verifying their current password.
+        /// The new password is automatically hashed using BCrypt before storage.
+        /// 
+        /// Example request body:
+        /// {
+        ///   "currentPassword": "OldPassword123!",
+        ///   "newPassword": "NewSecurePassword456!",
+        ///   "confirmNewPassword": "NewSecurePassword456!"
+        /// }
+        /// </summary>
+        /// <param name="id">The ID of the user changing their password</param>
+        /// <param name="changePasswordDto">The current and new password data</param>
+        /// <returns>Success message if changed, BadRequest if validation fails</returns>
+        [HttpPut("{id}/change-password")]
+        public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordDto changePasswordDto)
+        {
+            // Validate that new passwords match
+            if (changePasswordDto.NewPassword != changePasswordDto.ConfirmNewPassword)
+            {
+                return BadRequest(new { Error = "New password and confirmation do not match" });
+            }
+
+            // Validate password strength (optional - implement as needed)
+            if (changePasswordDto.NewPassword.Length < 6)
+            {
+                return BadRequest(new { Error = "New password must be at least 6 characters long" });
+            }
+
+            var success = await _service.ChangePasswordAsync(id, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            
+            if (!success)
+            {
+                return BadRequest(new { Error = "Current password is incorrect or user not found" });
+            }
+
+            return Ok(new { Message = "Password changed successfully" });
+        }
+    }
+}

@@ -1,0 +1,24 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace StudyGroup.Data.Models
+{
+    public class User
+    {
+        [Column("user_id")]
+        public int UserId { get; set; }
+        [Column("first_name")]
+        public string FirstName { get; set; } = string.Empty;
+        [Column("last_name")]
+        public string LastName { get; set; } = string.Empty;
+        [Column("email")]
+        public string Email { get; set; } = string.Empty;
+        [Column("password_hash")]
+        public string PasswordHash { get; set; } = string.Empty;
+        [Column("skills")]
+        public string? Skills { get; set; }
+        [Column("visibility")]
+        public bool? Visibility { get; set; }
+        [Column("bio")]
+        public string? Bio { get; set; }
+    }
+}

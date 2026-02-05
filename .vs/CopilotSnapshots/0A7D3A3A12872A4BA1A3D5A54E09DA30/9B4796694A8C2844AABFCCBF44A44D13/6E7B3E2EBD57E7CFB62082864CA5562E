@@ -1,0 +1,56 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Api.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class UsersController : ControllerBase
+    {
+        private readonly IUserService _service;
+
+        public UsersController(IUserService service)
+        {
+            _service = service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var users = await _service.GetAllUsersAsync();
+            return Ok(users);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var user = await _service.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateUserDto userDto)
+        {
+            var id = await _service.CreateUserAsync(userDto);
+            return CreatedAtAction(nameof(GetById), new { id }, userDto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto userDto)
+        {
+            var success = await _service.UpdateUserAsync(id, userDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteUserAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

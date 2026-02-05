@@ -1,0 +1,68 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for MembershipStatus endpoints
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MembershipStatusesController : ControllerBase
+    {
+        private readonly IMembershipStatusService _service;
+
+        // Injects the membership status service
+        public MembershipStatusesController(IMembershipStatusService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/membershipstatuses
+        // Returns all membership statuses
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var statuses = await _service.GetAllStatusesAsync();
+            return Ok(statuses);
+        }
+
+        // GET: api/membershipstatuses/{id}
+        // Returns a membership status by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var status = await _service.GetStatusByIdAsync(id);
+            if (status == null) return NotFound();
+            return Ok(status);
+        }
+
+        // POST: api/membershipstatuses
+        // Creates a new membership status
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateMembershipStatusDto statusDto)
+        {
+            var id = await _service.CreateStatusAsync(statusDto);
+            return CreatedAtAction(nameof(GetById), new { id }, statusDto);
+        }
+
+        // PUT: api/membershipstatuses/{id}
+        // Updates an existing membership status
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateMembershipStatusDto statusDto)
+        {
+            var success = await _service.UpdateStatusAsync(id, statusDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/membershipstatuses/{id}
+        // Deletes a membership status by ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteStatusAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

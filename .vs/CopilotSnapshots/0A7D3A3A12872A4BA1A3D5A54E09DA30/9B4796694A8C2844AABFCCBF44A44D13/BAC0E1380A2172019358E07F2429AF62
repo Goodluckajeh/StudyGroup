@@ -1,0 +1,15 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Api.DTOs;
+
+namespace StudyGroup.Service.Interfaces
+{
+    public interface IUserService
+    {
+        Task<IEnumerable<UserDto>> GetAllUsersAsync();
+        Task<UserDto?> GetUserByIdAsync(int userId);
+        Task<int> CreateUserAsync(CreateUserDto userDto);
+        Task<bool> UpdateUserAsync(int userId, UpdateUserDto userDto);
+        Task<bool> DeleteUserAsync(int userId);
+    }
+}

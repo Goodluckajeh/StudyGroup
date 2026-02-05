@@ -1,0 +1,124 @@
+﻿using HtmlAgilityPack;
+using StudyGroup.Data;
+using StudyGroup.Repository.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
+using StudyGroup.Repository.Data;
+
+namespace StudyGroup.Service.Models.Services
+{
+    public class CourseScraperService
+    {
+        private readonly AppDbContext _context;
+
+        public CourseScraperService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task ScrapeAndPopulateCoursesAsync()
+        {
+            var baseUrl = "https://catalog.principiacollege.edu";
+            var catalogUrl = $"{baseUrl}/courses-instruction/courses/";
+
+            var web = new HtmlWeb();
+            HtmlDocument doc;
+
+            try
+            {
+                doc = web.Load(catalogUrl);
+                Console.WriteLine("Successfully loaded main catalog page.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to load catalog page: {ex.Message}");
+                return;
+            }
+
+            // Step 1: Extract all group links
+            var groupLinks = doc.DocumentNode.SelectNodes("//ul/li/a[@href]");
+            if (groupLinks == null)
+            {
+                Console.WriteLine("No course groups found.");
+                return;
+            }
+
+            Console.WriteLine($"Found {groupLinks.Count} course groups.");
+
+            int totalAdded = 0;
+
+            foreach (var link in groupLinks)
+            {
+                var groupHref = link.GetAttributeValue("href", "").Trim();
+                if (string.IsNullOrWhiteSpace(groupHref))
+                    continue;
+
+                var groupUrl = baseUrl + groupHref;
+                HtmlDocument groupDoc;
+
+                try
+                {
+                    groupDoc = web.Load(groupUrl);
+                    Console.WriteLine($"Loaded group page: {groupUrl}");
+                }
+                catch
+                {
+                    Console.WriteLine($"Failed to load group page: {groupUrl}");
+                    continue;
+                }
+
+                // Step 2: Extract all courses in the group
+                var courseNodes = groupDoc.DocumentNode.SelectNodes("//div[contains(@class,'courseblock')]");
+                if (courseNodes == null)
+                {
+                    Console.WriteLine($"No courses found on page: {groupUrl}");
+                    continue;
+                }
+
+                foreach (var node in courseNodes)
+                {
+                    var codeNode = node.SelectSingleNode(".//span[contains(@class,'coursecode')]");
+                    var titleNode = node.SelectSingleNode(".//span[contains(@class,'coursetitle')]");
+                    var descNode = node.SelectSingleNode(".//p[contains(@class,'courseblockdesc')]");
+
+                    if (codeNode == null || titleNode == null)
+                        continue;
+
+                    var courseCode = codeNode.InnerText.Trim();
+                    var courseName = titleNode.InnerText.Trim();
+                    var description = descNode?.InnerText.Trim();
+
+                    // Skip duplicates
+                    if (await _context.Courses.AnyAsync(c => c.CourseCode == courseCode))
+                    {
+                        Console.WriteLine($"Skipping duplicate course: {courseCode}");
+                        continue;
+                    }
+
+                    var course = new Course
+                    {
+                        CourseCode = courseCode,
+                        CourseName = courseName,
+                        Description = description
+                    };
+
+                    _context.Courses.Add(course);
+                    totalAdded++;
+                    Console.WriteLine($"Added course: {courseCode} - {courseName}");
+                }
+            }
+
+            if (totalAdded > 0)
+            {
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"Saved {totalAdded} courses to the database.");
+            }
+            else
+            {
+                Console.WriteLine("No courses were added to the database.");
+            }
+
+            Console.WriteLine("Scraping complete.");
+        }
+    }
+}

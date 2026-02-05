@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    // Contains SQL queries for Tag entity CRUD operations
+    public static class TagSql
+    {
+        public const string GetAll = @"SELECT * FROM tags";
+        public const string GetById = @"SELECT * FROM tags WHERE tag_id = @TagId";
+        public const string Insert = @"INSERT INTO tags (name, entity_type_id, entity_id) VALUES (@Name, @EntityTypeId, @EntityId); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE tags SET name = @Name, entity_type_id = @EntityTypeId, entity_id = @EntityId WHERE tag_id = @TagId";
+        public const string Delete = @"DELETE FROM tags WHERE tag_id = @TagId";
+    }
+}

@@ -1,0 +1,54 @@
+﻿using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
+using Dapper;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.SqlQueries;
+
+namespace StudyGroup.Data.Repositories
+{
+    // Implements ICourseRepository using Dapper for data access
+    public class CourseRepository : ICourseRepository
+    {
+        private readonly IDbConnection _dbConnection;
+
+        // Injects the database connection
+        public CourseRepository(IDbConnection dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
+
+        // Gets all courses from the database
+        public async Task<IEnumerable<Course>> GetAllAsync()
+        {
+            return await _dbConnection.QueryAsync<Course>(CourseSql.GetAll);
+        }
+
+        // Gets a single course by its ID
+        public async Task<Course?> GetByIdAsync(int courseId)
+        {
+            return await _dbConnection.QueryFirstOrDefaultAsync<Course>(CourseSql.GetById, new { CourseId = courseId });
+        }
+
+        // Inserts a new course and returns its ID
+        public async Task<int> CreateAsync(Course course)
+        {
+            return await _dbConnection.QuerySingleAsync<int>(CourseSql.Insert, course);
+        }
+
+        // Updates an existing course
+        public async Task<bool> UpdateAsync(Course course)
+        {
+            var affected = await _dbConnection.ExecuteAsync(CourseSql.Update, course);
+            return affected > 0;
+        }
+
+        // Deletes a course by its ID
+        public async Task<bool> DeleteAsync(int courseId)
+        {
+            var affected = await _dbConnection.ExecuteAsync(CourseSql.Delete, new { CourseId = courseId });
+            return affected > 0;
+        }
+    }
+}

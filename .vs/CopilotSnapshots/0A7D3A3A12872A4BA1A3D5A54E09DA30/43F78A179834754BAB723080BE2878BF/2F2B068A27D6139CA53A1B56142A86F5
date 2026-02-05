@@ -1,0 +1,357 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Data;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Controller for populating tags directly from database queries.
+    /// This approach directly queries existing data to create relevant tags.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class TagPopulationController : ControllerBase
+    {
+        private readonly ITagService _tagService;
+        private readonly IUserService _userService;
+        private readonly IStudyGroupService _studyGroupService;
+        private readonly IDbConnection _dbConnection;
+
+        public TagPopulationController(
+            ITagService tagService,
+            IUserService userService,
+            IStudyGroupService studyGroupService,
+            IDbConnection dbConnection)
+        {
+            _tagService = tagService;
+            _userService = userService;
+            _studyGroupService = studyGroupService;
+            _dbConnection = dbConnection;
+        }
+
+        /// <summary>
+        /// POST: api/tagpopulation/populate-user-skill-tags
+        /// Populates tags based on all existing user skills in the database.
+        /// </summary>
+        [HttpPost("populate-user-skill-tags")]
+        public async Task<IActionResult> PopulateUserSkillTags()
+        {
+            try
+            {
+                var users = await _userService.GetAllUsersAsync();
+                var createdTags = new List<string>();
+                var skippedUsers = new List<string>();
+
+                foreach (var user in users)
+                {
+                    if (string.IsNullOrWhiteSpace(user.Skills))
+                    {
+                        skippedUsers.Add($"{user.FirstName} {user.LastName} (no skills)");
+                        continue;
+                    }
+
+                    // Parse skills
+                    var skills = user.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                           .Select(s => s.Trim())
+                                           .Where(s => !string.IsNullOrWhiteSpace(s))
+                                           .ToList();
+
+                    foreach (var skill in skills)
+                    {
+                        try
+                        {
+                            var createTagDto = new CreateTagDto
+                            {
+                                Name = skill,
+                                EntityTypeId = 1, // User entity type ID
+                                EntityId = user.UserId
+                            };
+
+                            await _tagService.CreateTagAsync(createTagDto);
+                            createdTags.Add($"{skill} → User: {user.FirstName} {user.LastName}");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Tag might already exist or other error
+                            Console.WriteLine($"Failed to create skill tag '{skill}' for user {user.UserId}: {ex.Message}");
+                        }
+                    }
+                }
+
+                return Ok(new
+                {
+                    Message = $"✅ Created {createdTags.Count} skill tags from existing user data",
+                    CreatedTags = createdTags,
+                    SkippedUsers = skippedUsers,
+                    Instructions = "Check GET /api/tags to see all created tags"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to populate user skill tags", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/tagpopulation/populate-course-tags
+        /// Populates tags based on all existing study group courses in the database.
+        /// </summary>
+        [HttpPost("populate-course-tags")]
+        public async Task<IActionResult> PopulateCourseTagsFromStudyGroups()
+        {
+            try
+            {
+                var studyGroups = await _studyGroupService.GetAllGroupsAsync();
+                var createdTags = new List<string>();
+
+                foreach (var group in studyGroups)
+                {
+                    if (string.IsNullOrWhiteSpace(group.CourseName))
+                        continue;
+
+                    // Create tags based on course name
+                    var courseTags = GenerateCourseRelatedTags(group.CourseName);
+
+                    foreach (var tag in courseTags)
+                    {
+                        try
+                        {
+                            var createTagDto = new CreateTagDto
+                            {
+                                Name = tag,
+                                EntityTypeId = 4, // StudyGroup entity type ID (you mentioned ID 4)
+                                EntityId = group.GroupId
+                            };
+
+                            await _tagService.CreateTagAsync(createTagDto);
+                            createdTags.Add($"{tag} → StudyGroup: {group.Topic}");
+                        }
+                        catch (Exception ex)
+                        {
+                            // Tag might already exist
+                            Console.WriteLine($"Failed to create course tag '{tag}' for group {group.GroupId}: {ex.Message}");
+                        }
+                    }
+                }
+
+                return Ok(new
+                {
+                    Message = $"✅ Created {createdTags.Count} course tags from existing study groups",
+                    CreatedTags = createdTags,
+                    Instructions = "Check GET /api/tags to see all created tags"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to populate course tags", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/tagpopulation/populate-all-tags
+        /// Populates both user skill tags and study group course tags.
+        /// </summary>
+        [HttpPost("populate-all-tags")]
+        public async Task<IActionResult> PopulateAllTags()
+        {
+            try
+            {
+                var results = new
+                {
+                    UserSkillTags = new List<string>(),
+                    CourseTags = new List<string>(),
+                    TotalCreated = 0
+                };
+
+                // Populate user skill tags
+                var users = await _userService.GetAllUsersAsync();
+                foreach (var user in users)
+                {
+                    if (string.IsNullOrWhiteSpace(user.Skills)) continue;
+
+                    var skills = user.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                           .Select(s => s.Trim())
+                                           .Where(s => !string.IsNullOrWhiteSpace(s));
+
+                    foreach (var skill in skills)
+                    {
+                        try
+                        {
+                            await _tagService.CreateTagAsync(new CreateTagDto
+                            {
+                                Name = skill,
+                                EntityTypeId = 1, // User
+                                EntityId = user.UserId
+                            });
+                            results.UserSkillTags.Add($"{skill} → {user.FirstName} {user.LastName}");
+                        }
+                        catch { /* Skip duplicates */ }
+                    }
+                }
+
+                // Populate course tags
+                var studyGroups = await _studyGroupService.GetAllGroupsAsync();
+                foreach (var group in studyGroups)
+                {
+                    if (string.IsNullOrWhiteSpace(group.CourseName)) continue;
+
+                    var courseTags = GenerateCourseRelatedTags(group.CourseName);
+                    foreach (var tag in courseTags)
+                    {
+                        try
+                        {
+                            await _tagService.CreateTagAsync(new CreateTagDto
+                            {
+                                Name = tag,
+                                EntityTypeId = 4, // StudyGroup
+                                EntityId = group.GroupId
+                            });
+                            results.CourseTags.Add($"{tag} → {group.Topic}");
+                        }
+                        catch { /* Skip duplicates */ }
+                    }
+                }
+
+                var totalCreated = results.UserSkillTags.Count + results.CourseTags.Count;
+
+                return Ok(new
+                {
+                    Message = $"✅ Database-driven tag population completed! Created {totalCreated} tags total",
+                    Summary = new
+                    {
+                        UserSkillTagsCreated = results.UserSkillTags.Count,
+                        CourseTagsCreated = results.CourseTags.Count,
+                        TotalTagsCreated = totalCreated
+                    },
+                    Details = new
+                    {
+                        UserSkillTags = results.UserSkillTags.Take(20).ToList(), // Show first 20
+                        CourseTags = results.CourseTags.Take(20).ToList() // Show first 20
+                    },
+                    Instructions = new[]
+                    {
+                        "✅ Check GET /api/tags to see all created tags",
+                        "✅ Now when users update skills, tags will be managed automatically",
+                        "✅ Study groups will get course-based tags automatically"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to populate all tags", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/tagpopulation/clear-all-tags
+        /// Removes all existing tags (for testing purposes).
+        /// </summary>
+        [HttpDelete("clear-all-tags")]
+        public async Task<IActionResult> ClearAllTags()
+        {
+            try
+            {
+                var allTags = await _tagService.GetAllTagsAsync();
+                var deletedCount = 0;
+
+                foreach (var tag in allTags)
+                {
+                    try
+                    {
+                        await _tagService.DeleteTagAsync(tag.TagId);
+                        deletedCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to delete tag {tag.TagId}: {ex.Message}");
+                    }
+                }
+
+                return Ok(new
+                {
+                    Message = $"✅ Cleared {deletedCount} tags from the database",
+                    Note = "You can now repopulate with fresh data using the populate endpoints"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to clear tags", Details = ex.Message });
+            }
+        }
+
+        #region Private Helper Methods
+
+        /// <summary>
+        /// Generates relevant tags based on course name.
+        /// </summary>
+        private List<string> GenerateCourseRelatedTags(string courseName)
+        {
+            var tags = new List<string>();
+
+            // Always add the full course name
+            tags.Add(courseName);
+
+            // Subject keyword mapping
+            var subjectKeywords = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Psychology", new List<string> {"Psychology", "Social Science", "Behavioral Science"}},
+                {"Biology", new List<string> {"Biology", "Life Science", "Science"}},
+                {"Chemistry", new List<string> {"Chemistry", "Physical Science", "Science"}},
+                {"Physics", new List<string> {"Physics", "Physical Science", "Science"}},
+                {"Calculus", new List<string> {"Calculus", "Mathematics", "Math"}},
+                {"Algebra", new List<string> {"Algebra", "Mathematics", "Math"}},
+                {"Statistics", new List<string> {"Statistics", "Mathematics", "Math", "Data Analysis"}},
+                {"Computer", new List<string> {"Computer Science", "Programming", "Technology"}},
+                {"Programming", new List<string> {"Programming", "Computer Science", "Technology", "Coding"}},
+                {"History", new List<string> {"History", "Social Science", "Humanities"}},
+                {"English", new List<string> {"English", "Literature", "Writing", "Language Arts"}},
+                {"Literature", new List<string> {"Literature", "English", "Reading", "Humanities"}},
+                {"Art", new List<string> {"Art", "Creative Arts", "Visual Arts"}},
+                {"Music", new List<string> {"Music", "Performing Arts", "Fine Arts"}},
+                {"Theatre", new List<string> {"Theatre", "Performing Arts", "Drama", "Fine Arts"}},
+                {"Economics", new List<string> {"Economics", "Business", "Social Science"}},
+                {"Business", new List<string> {"Business", "Management", "Economics"}},
+                {"Philosophy", new List<string> {"Philosophy", "Critical Thinking", "Humanities"}},
+                {"Java", new List<string> {"Java", "Programming", "Computer Science"}},
+                {"Python", new List<string> {"Python", "Programming", "Computer Science"}},
+                {"JavaScript", new List<string> {"JavaScript", "Programming", "Web Development"}}
+            };
+
+            // Check each word in the course name
+            var words = courseName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var word in words)
+            {
+                // Add level indicators
+                if (word.Equals("Introduction", StringComparison.OrdinalIgnoreCase) || 
+                    word.Equals("Intro", StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.AddRange(new[] { "Beginner", "Introduction", "Introductory" });
+                }
+                else if (word.Equals("Advanced", StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.AddRange(new[] { "Advanced", "Upper Level" });
+                }
+                else if (word.Equals("Intermediate", StringComparison.OrdinalIgnoreCase))
+                {
+                    tags.Add("Intermediate");
+                }
+
+                // Check for subject matches
+                foreach (var mapping in subjectKeywords)
+                {
+                    if (word.Contains(mapping.Key, StringComparison.OrdinalIgnoreCase))
+                    {
+                        tags.AddRange(mapping.Value);
+                    }
+                }
+            }
+
+            return tags.Distinct().ToList();
+        }
+
+        #endregion
+    }
+}

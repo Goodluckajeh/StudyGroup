@@ -1,0 +1,48 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Test controller to verify JWT authentication is working.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TestController : ControllerBase
+    {
+        /// <summary>
+        /// GET: api/test/public
+        /// Public endpoint that doesn't require authentication.
+        /// </summary>
+        [HttpGet("public")]
+        [AllowAnonymous]
+        public IActionResult Public()
+        {
+            return Ok(new { Message = "This is a public endpoint", Timestamp = DateTime.UtcNow });
+        }
+
+        /// <summary>
+        /// GET: api/test/protected
+        /// Protected endpoint that requires JWT authentication.
+        /// </summary>
+        [HttpGet("protected")]
+        [Authorize]
+        public IActionResult Protected()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var name = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            return Ok(new 
+            { 
+                Message = "You are authenticated!", 
+                UserId = userId,
+                Email = email,
+                Name = name,
+                Timestamp = DateTime.UtcNow,
+                Claims = User.Claims.Select(c => new { c.Type, c.Value })
+            });
+        }
+    }
+}

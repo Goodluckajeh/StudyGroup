@@ -1,0 +1,74 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements ICourseService, contains business logic for courses
+    public class CourseService : ICourseService
+    {
+        private readonly ICourseRepository _repository;
+
+        // Injects the course repository
+        public CourseService(ICourseRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps Course model (PascalCase) to CourseDto (PascalCase)
+        private CourseDto MapToDto(Course course) => new CourseDto
+        {
+            CourseId = course.CourseId,
+            CourseCode = course.CourseCode,
+            CourseName = course.CourseName,
+            Description = course.Description
+        };
+
+        // Gets all courses
+        public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync()
+        {
+            var courses = await _repository.GetAllAsync();
+            return courses.Select(MapToDto);
+        }
+
+        // Gets a course by ID
+        public async Task<CourseDto?> GetCourseByIdAsync(int courseId)
+        {
+            var course = await _repository.GetByIdAsync(courseId);
+            return course == null ? null : MapToDto(course);
+        }
+
+        // Creates a new course
+        public async Task<int> CreateCourseAsync(CreateCourseDto courseDto)
+        {
+            var course = new Course
+            {
+                CourseCode = courseDto.CourseCode,
+                CourseName = courseDto.CourseName,
+                Description = courseDto.Description
+            };
+            return await _repository.CreateAsync(course);
+        }
+
+        // Updates an existing course
+        public async Task<bool> UpdateCourseAsync(int courseId, UpdateCourseDto courseDto)
+        {
+            var course = await _repository.GetByIdAsync(courseId);
+            if (course == null) return false;
+            course.CourseCode = courseDto.CourseCode;
+            course.CourseName = courseDto.CourseName;
+            course.Description = courseDto.Description;
+            return await _repository.UpdateAsync(course);
+        }
+
+        // Deletes a course by ID
+        public async Task<bool> DeleteCourseAsync(int courseId)
+        {
+            return await _repository.DeleteAsync(courseId);
+        }
+    }
+}

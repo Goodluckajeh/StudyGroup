@@ -1,0 +1,61 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.Services;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Repositories;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+    );
+
+// Swagger/OpenAPI
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Register Dapper's IDbConnection
+builder.Services.AddScoped<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register repository and service
+builder.Services.AddScoped<IStudyGroupRepository, StudyGroupRepository>();
+builder.Services.AddScoped<IStudyGroupService, StudyGroupService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IMembershipStatusRepository, MembershipStatusRepository>();
+builder.Services.AddScoped<IMembershipStatusService, MembershipStatusService>();
+
+
+// ----------------------
+// Build app
+// ----------------------
+var app = builder.Build();
+
+// Configure HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage(); // helpful for debugging
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

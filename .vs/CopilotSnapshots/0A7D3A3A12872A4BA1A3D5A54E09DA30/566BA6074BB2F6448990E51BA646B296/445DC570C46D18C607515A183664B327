@@ -1,0 +1,67 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    public class TagService : ITagService
+    {
+        private readonly ITagRepository _repository;
+
+        public TagService(ITagRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps Tag model (snake_case) to TagDto (PascalCase)
+        private TagDto MapToDto(Tag tag) => new TagDto
+        {
+            TagId = tag.tag_id,
+            Name = tag.name,
+            EntityTypeId = tag.entity_type_id,
+            EntityId = tag.entity_id
+        };
+
+        public async Task<IEnumerable<TagDto>> GetAllTagsAsync()
+        {
+            var tags = await _repository.GetAllAsync();
+            return tags.Select(MapToDto);
+        }
+
+        public async Task<TagDto?> GetTagByIdAsync(int tagId)
+        {
+            var tag = await _repository.GetByIdAsync(tagId);
+            return tag == null ? null : MapToDto(tag);
+        }
+
+        public async Task<int> CreateTagAsync(CreateTagDto tagDto)
+        {
+            var tag = new Tag
+            {
+                name = tagDto.Name,
+                entity_type_id = tagDto.EntityTypeId,
+                entity_id = tagDto.EntityId
+            };
+            return await _repository.CreateAsync(tag);
+        }
+
+        public async Task<bool> UpdateTagAsync(int tagId, UpdateTagDto tagDto)
+        {
+            var tag = await _repository.GetByIdAsync(tagId);
+            if (tag == null) return false;
+            tag.name = tagDto.Name;
+            tag.entity_type_id = tagDto.EntityTypeId;
+            tag.entity_id = tagDto.EntityId;
+            return await _repository.UpdateAsync(tag);
+        }
+
+        public async Task<bool> DeleteTagAsync(int tagId)
+        {
+            return await _repository.DeleteAsync(tagId);
+        }
+    }
+}

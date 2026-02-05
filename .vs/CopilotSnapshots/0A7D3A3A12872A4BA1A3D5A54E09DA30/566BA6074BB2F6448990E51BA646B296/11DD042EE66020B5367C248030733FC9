@@ -1,0 +1,8 @@
+﻿namespace StudyGroup.Data.Models
+{
+    public class EntityType
+    {
+        public int entity_type_id { get; set; }
+        public string entity_type_name { get; set; } = string.Empty;
+    }
+}

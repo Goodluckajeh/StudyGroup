@@ -1,0 +1,101 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// Test controller to verify JWT authentication is working.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TestController : ControllerBase
+    {
+        /// <summary>
+        /// GET: api/test/public
+        /// Public endpoint that doesn't require authentication.
+        /// </summary>
+        [HttpGet("public")]
+        [AllowAnonymous]
+        public IActionResult Public()
+        {
+            return Ok(new 
+            { 
+                Message = "✅ Public endpoint working - API is accessible",
+                Timestamp = DateTime.UtcNow,
+                NextSteps = new[]
+                {
+                    "1. Register: POST /api/auth/register",
+                    "2. Login: POST /api/auth/login",
+                    "3. Copy the token from login response",
+                    "4. Click 'Authorize' in Swagger and enter: Bearer {your-token}",
+                    "5. Test: GET /api/test/protected"
+                }
+            });
+        }
+
+        /// <summary>
+        /// GET: api/test/protected
+        /// Protected endpoint that requires JWT authentication.
+        /// </summary>
+        [HttpGet("protected")]
+        [Authorize]
+        public IActionResult Protected()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var name = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            return Ok(new 
+            { 
+                Message = "🎉 JWT Authentication successful!",
+                UserInfo = new
+                {
+                    UserId = userId,
+                    Email = email,
+                    Name = name,
+                    IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                    AuthenticationType = User.Identity?.AuthenticationType
+                },
+                Timestamp = DateTime.UtcNow,
+                AllClaims = User.Claims.Select(c => new { c.Type, c.Value }).ToList(),
+                SuccessMessage = "You can now access all protected endpoints!"
+            });
+        }
+
+        /// <summary>
+        /// GET: api/test/debug
+        /// Debug endpoint to check authentication status without requiring auth.
+        /// </summary>
+        [HttpGet("debug")]
+        [AllowAnonymous]
+        public IActionResult Debug()
+        {
+            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            var hasAuthHeader = !string.IsNullOrEmpty(authHeader);
+            var tokenFormat = "No token";
+            
+            if (hasAuthHeader)
+            {
+                tokenFormat = authHeader.StartsWith("Bearer ") ? "✅ Correct format" : "❌ Wrong format - should be 'Bearer {token}'";
+            }
+
+            return Ok(new 
+            { 
+                Message = "🔍 Authentication Debug Information",
+                AuthenticationStatus = new
+                {
+                    HasAuthorizationHeader = hasAuthHeader,
+                    TokenFormat = tokenFormat,
+                    HeaderPreview = hasAuthHeader ? authHeader?.Substring(0, Math.Min(30, authHeader.Length)) + "..." : "None",
+                    IsAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                    ClaimsCount = User.Claims?.Count() ?? 0
+                },
+                Instructions = hasAuthHeader ? 
+                    "Token detected. Try the protected endpoint." : 
+                    "No token found. Login first, then use the Authorize button.",
+                Timestamp = DateTime.UtcNow
+            });
+        }
+    }
+}

@@ -1,0 +1,68 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for GroupMember endpoints
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GroupMembersController : ControllerBase
+    {
+        private readonly IGroupMemberService _service;
+
+        // Injects the group member service
+        public GroupMembersController(IGroupMemberService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/groupmembers
+        // Returns all group members
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var members = await _service.GetAllGroupMembersAsync();
+            return Ok(members);
+        }
+
+        // GET: api/groupmembers/{id}
+        // Returns a group member by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var member = await _service.GetGroupMemberByIdAsync(id);
+            if (member == null) return NotFound();
+            return Ok(member);
+        }
+
+        // POST: api/groupmembers
+        // Creates a new group member
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateGroupMemberDto groupMemberDto)
+        {
+            var id = await _service.CreateGroupMemberAsync(groupMemberDto);
+            return CreatedAtAction(nameof(GetById), new { id }, groupMemberDto);
+        }
+
+        // PUT: api/groupmembers/{id}
+        // Updates an existing group member
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateGroupMemberDto groupMemberDto)
+        {
+            var success = await _service.UpdateGroupMemberAsync(id, groupMemberDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/groupmembers/{id}
+        // Deletes a group member by ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteGroupMemberAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

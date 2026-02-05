@@ -1,0 +1,147 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+using System.Linq;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements IGroupMemberService, contains business logic for group members
+    public class GroupMemberService : IGroupMemberService
+    {
+        private readonly IGroupMemberRepository _repository;
+        
+        // Assume these status IDs - you may need to adjust based on your MembershipStatuses data
+        private const int PendingStatusId = 1;
+        private const int ActiveStatusId = 2;
+        private const int RejectedStatusId = 3;
+
+        // Injects the group member repository
+        public GroupMemberService(IGroupMemberRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Maps GroupMember model (PascalCase) to GroupMemberDto (PascalCase)
+        private GroupMemberDto MapToDto(GroupMember member) => new GroupMemberDto
+        {
+            GroupMemberId = member.GroupMemberId,
+            GroupId = member.GroupId,
+            UserId = member.UserId,
+            StatusId = member.StatusId
+        };
+
+        // Basic CRUD operations
+        // Gets all group members
+        public async Task<IEnumerable<GroupMemberDto>> GetAllGroupMembersAsync()
+        {
+            var members = await _repository.GetAllAsync();
+            return members.Select(MapToDto);
+        }
+
+        // Gets a group member by ID
+        public async Task<GroupMemberDto?> GetGroupMemberByIdAsync(int groupMemberId)
+        {
+            var member = await _repository.GetByIdAsync(groupMemberId);
+            return member == null ? null : MapToDto(member);
+        }
+
+        // Creates a new group member
+        public async Task<int> CreateGroupMemberAsync(CreateGroupMemberDto groupMemberDto)
+        {
+            var member = new GroupMember
+            {
+                GroupId = groupMemberDto.GroupId,
+                UserId = groupMemberDto.UserId,
+                StatusId = groupMemberDto.StatusId
+            };
+            return await _repository.CreateAsync(member);
+        }
+
+        // Updates an existing group member
+        public async Task<bool> UpdateGroupMemberAsync(int groupMemberId, UpdateGroupMemberDto groupMemberDto)
+        {
+            var member = await _repository.GetByIdAsync(groupMemberId);
+            if (member == null) return false;
+            member.GroupId = groupMemberDto.GroupId;
+            member.UserId = groupMemberDto.UserId;
+            member.StatusId = groupMemberDto.StatusId;
+            return await _repository.UpdateAsync(member);
+        }
+
+        // Deletes a group member by ID
+        public async Task<bool> DeleteGroupMemberAsync(int groupMemberId)
+        {
+            return await _repository.DeleteAsync(groupMemberId);
+        }
+
+        // Specialized membership management methods
+        public async Task<IEnumerable<GroupMemberDto>> GetGroupMembersAsync(int groupId)
+        {
+            var members = await _repository.GetByGroupIdAsync(groupId);
+            return members.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<GroupMemberDto>> GetUserGroupsAsync(int userId)
+        {
+            var memberships = await _repository.GetByUserIdAsync(userId);
+            return memberships.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<GroupMemberDto>> GetPendingMembersAsync(int groupId)
+        {
+            var pendingMembers = await _repository.GetByGroupIdAndStatusAsync(groupId, PendingStatusId);
+            return pendingMembers.Select(MapToDto);
+        }
+
+        public async Task<IEnumerable<GroupMemberDto>> GetActiveMembersAsync(int groupId)
+        {
+            var activeMembers = await _repository.GetByGroupIdAndStatusAsync(groupId, ActiveStatusId);
+            return activeMembers.Select(MapToDto);
+        }
+
+        public async Task<int> JoinGroupAsync(int groupId, int userId)
+        {
+            // Check if user is already a member
+            var existingMembership = await _repository.GetByGroupIdAndUserIdAsync(groupId, userId);
+            if (existingMembership != null)
+            {
+                throw new InvalidOperationException("User is already a member of this group");
+            }
+
+            // Create new membership with "Pending" status
+            var member = new GroupMember
+            {
+                GroupId = groupId,
+                UserId = userId,
+                StatusId = PendingStatusId
+            };
+            return await _repository.CreateAsync(member);
+        }
+
+        public async Task<bool> ApproveMembershipAsync(int groupMemberId)
+        {
+            var member = await _repository.GetByIdAsync(groupMemberId);
+            if (member == null || member.StatusId != PendingStatusId) return false;
+            
+            member.StatusId = ActiveStatusId;
+            return await _repository.UpdateAsync(member);
+        }
+
+        public async Task<bool> RejectMembershipAsync(int groupMemberId)
+        {
+            var member = await _repository.GetByIdAsync(groupMemberId);
+            if (member == null || member.StatusId != PendingStatusId) return false;
+            
+            member.StatusId = RejectedStatusId;
+            return await _repository.UpdateAsync(member);
+        }
+
+        public async Task<bool> RemoveFromGroupAsync(int groupMemberId)
+        {
+            return await _repository.DeleteAsync(groupMemberId);
+        }
+    }
+}

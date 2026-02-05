@@ -1,0 +1,148 @@
+﻿using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Services
+{
+    /// <summary>
+    /// Service for seeding initial data into the database.
+    /// Provides common tags and reference data for the StudyGroup system.
+    /// </summary>
+    public class DataSeedingService
+    {
+        private readonly ITagService _tagService;
+        private readonly ICourseService _courseService;
+        private readonly IMembershipStatusService _membershipStatusService;
+
+        public DataSeedingService(ITagService tagService, ICourseService courseService, IMembershipStatusService membershipStatusService)
+        {
+            _tagService = tagService;
+            _courseService = courseService;
+            _membershipStatusService = membershipStatusService;
+        }
+
+        /// <summary>
+        /// Seeds common academic and study-related tags.
+        /// </summary>
+        public async Task SeedTagsAsync()
+        {
+            var commonTags = new[]
+            {
+                // Academic Subjects
+                "Mathematics", "Biology", "Chemistry", "Physics", "Computer Science",
+                "Psychology", "Philosophy", "History", "English Literature", "Economics",
+                "Political Science", "Sociology", "Art", "Music", "Theatre",
+                
+                // Study Methods
+                "Exam Prep", "Homework Help", "Project Collaboration", "Discussion Group",
+                "Practice Problems", "Study Sessions", "Review Sessions", "Quiz Practice",
+                "Paper Writing", "Research Group", "Lab Work", "Field Study",
+                
+                // Difficulty Levels
+                "Beginner", "Intermediate", "Advanced", "101 Level", "Upper Division",
+                "Graduate Level", "Remedial", "Honors", "AP Level",
+                
+                // Study Formats
+                "Online", "In-Person", "Hybrid", "Library Study", "Outdoor Study",
+                "Group Study", "Peer Tutoring", "Study Buddy",
+                
+                // Time-based
+                "Weekend", "Evening", "Morning", "Late Night", "Before Class",
+                "After Class", "Lunch Break", "Finals Week", "Midterms",
+                
+                // Special Focus
+                "Test Anxiety", "Note Taking", "Time Management", "Study Skills",
+                "Critical Thinking", "Problem Solving", "Presentation Skills",
+                "Research Methods", "Writing Center", "Math Center",
+                
+                // Course Types
+                "Laboratory", "Lecture", "Seminar", "Workshop", "Tutorial",
+                "Independent Study", "Capstone", "Thesis", "Internship"
+            };
+
+            foreach (var tagName in commonTags)
+            {
+                try
+                {
+                    await _tagService.CreateTagAsync(new CreateTagDto { TagName = tagName });
+                }
+                catch (Exception)
+                {
+                    // Tag might already exist, continue with next tag
+                }
+            }
+        }
+
+        /// <summary>
+        /// Seeds essential membership statuses.
+        /// </summary>
+        public async Task SeedMembershipStatusesAsync()
+        {
+            var statuses = new[]
+            {
+                "Pending",
+                "Active", 
+                "Rejected",
+                "Inactive",
+                "Left Group"
+            };
+
+            foreach (var status in statuses)
+            {
+                try
+                {
+                    await _membershipStatusService.CreateMembershipStatusAsync(new CreateMembershipStatusDto { StatusName = status });
+                }
+                catch (Exception)
+                {
+                    // Status might already exist
+                }
+            }
+        }
+
+        /// <summary>
+        /// Seeds sample courses for Principia College.
+        /// </summary>
+        public async Task SeedCoursesAsync()
+        {
+            var courses = new[]
+            {
+                // Mathematics
+                "College Algebra", "Calculus I", "Calculus II", "Statistics", "Linear Algebra",
+                "Differential Equations", "Discrete Mathematics", "Mathematical Reasoning",
+                
+                // Sciences
+                "General Biology", "General Chemistry", "Organic Chemistry", "Physics I", "Physics II",
+                "Anatomy & Physiology", "Microbiology", "Environmental Science", "Astronomy",
+                
+                // Computer Science
+                "Introduction to Programming", "Data Structures", "Algorithms", "Database Systems",
+                "Web Development", "Software Engineering", "Computer Networks", "Artificial Intelligence",
+                
+                // Liberal Arts
+                "English Composition", "Literature", "World History", "American History",
+                "Introduction to Psychology", "Sociology", "Philosophy", "Ethics",
+                "Public Speaking", "Creative Writing",
+                
+                // Business
+                "Principles of Economics", "Business Management", "Marketing", "Accounting",
+                "Finance", "Organizational Behavior", "Business Ethics",
+                
+                // Arts
+                "Art History", "Studio Art", "Music Theory", "Music Performance",
+                "Theatre Arts", "Dance", "Photography", "Graphic Design"
+            };
+
+            foreach (var course in courses)
+            {
+                try
+                {
+                    await _courseService.CreateCourseAsync(new CreateCourseDto { CourseName = course });
+                }
+                catch (Exception)
+                {
+                    // Course might already exist
+                }
+            }
+        }
+    }
+}

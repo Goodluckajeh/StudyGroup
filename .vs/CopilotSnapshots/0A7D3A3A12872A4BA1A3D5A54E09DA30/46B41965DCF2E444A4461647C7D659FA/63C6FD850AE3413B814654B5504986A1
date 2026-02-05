@@ -1,0 +1,10 @@
+﻿namespace StudyGroup.Data.Models
+{
+    public class Tag
+    {
+        public int tag_id { get; set; }
+        public string name { get; set; } = string.Empty;
+        public int entity_type_id { get; set; }
+        public int entity_id { get; set; }
+    }
+}

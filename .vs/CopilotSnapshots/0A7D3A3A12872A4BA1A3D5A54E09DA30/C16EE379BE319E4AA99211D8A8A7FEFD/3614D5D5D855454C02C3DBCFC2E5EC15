@@ -1,0 +1,181 @@
+﻿using System.Net;
+using System.Net.Mail;
+
+namespace StudyGroup.Api.Services
+{
+    /// <summary>
+    /// Service for sending emails including email verification messages.
+    /// Handles SMTP configuration and email template generation.
+    /// </summary>
+    public class EmailService
+    {
+        private readonly IConfiguration _configuration;
+        private readonly string _smtpHost;
+        private readonly int _smtpPort;
+        private readonly string _smtpUsername;
+        private readonly string _smtpPassword;
+        private readonly string _fromEmail;
+        private readonly string _fromName;
+        private readonly bool _enableSsl;
+
+        /// <summary>
+        /// Initializes a new instance of the EmailService.
+        /// </summary>
+        /// <param name="configuration">Application configuration for SMTP settings</param>
+        public EmailService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _smtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
+            _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
+            _smtpUsername = _configuration["Email:SmtpUsername"] ?? throw new InvalidOperationException("Email SmtpUsername not configured");
+            _smtpPassword = _configuration["Email:SmtpPassword"] ?? throw new InvalidOperationException("Email SmtpPassword not configured");
+            _fromEmail = _configuration["Email:FromEmail"] ?? _smtpUsername;
+            _fromName = _configuration["Email:FromName"] ?? "StudyGroup App";
+            _enableSsl = bool.Parse(_configuration["Email:EnableSsl"] ?? "true");
+        }
+
+        /// <summary>
+        /// Sends an email verification message to the user.
+        /// Contains a verification link that the user must click to activate their account.
+        /// </summary>
+        /// <param name="toEmail">The recipient's email address</param>
+        /// <param name="toName">The recipient's name</param>
+        /// <param name="verificationToken">The unique verification token</param>
+        /// <param name="baseUrl">The base URL of the application for generating the verification link</param>
+        /// <returns>True if email was sent successfully, false otherwise</returns>
+        public async Task<bool> SendEmailVerificationAsync(string toEmail, string toName, string verificationToken, string baseUrl)
+        {
+            try
+            {
+                var verificationUrl = $"{baseUrl}/api/users/verify-email?token={verificationToken}";
+                
+                var subject = "Verify Your Email Address - StudyGroup App";
+                var htmlBody = GenerateEmailVerificationHtml(toName, verificationUrl);
+                var textBody = GenerateEmailVerificationText(toName, verificationUrl);
+
+                return await SendEmailAsync(toEmail, toName, subject, htmlBody, textBody);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you might want to use ILogger here)
+                Console.WriteLine($"Failed to send verification email: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Sends an email using the configured SMTP settings.
+        /// </summary>
+        /// <param name="toEmail">Recipient email address</param>
+        /// <param name="toName">Recipient name</param>
+        /// <param name="subject">Email subject</param>
+        /// <param name="htmlBody">HTML email body</param>
+        /// <param name="textBody">Plain text email body (fallback)</param>
+        /// <returns>True if email was sent successfully, false otherwise</returns>
+        private async Task<bool> SendEmailAsync(string toEmail, string toName, string subject, string htmlBody, string textBody)
+        {
+            try
+            {
+                using var client = new SmtpClient(_smtpHost, _smtpPort);
+                client.EnableSsl = _enableSsl;
+                client.UseDefaultCredentials = false;
+                client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+
+                using var message = new MailMessage();
+                message.From = new MailAddress(_fromEmail, _fromName);
+                message.To.Add(new MailAddress(toEmail, toName));
+                message.Subject = subject;
+                message.Body = htmlBody;
+                message.IsBodyHtml = true;
+
+                // Add plain text alternative
+                var plainTextView = AlternateView.CreateAlternateViewFromString(textBody, null, "text/plain");
+                message.AlternateViews.Add(plainTextView);
+
+                await client.SendMailAsync(message);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send email: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Generates HTML email body for email verification.
+        /// </summary>
+        /// <param name="userName">The user's name</param>
+        /// <param name="verificationUrl">The verification URL</param>
+        /// <returns>HTML email content</returns>
+        private string GenerateEmailVerificationHtml(string userName, string verificationUrl)
+        {
+            return $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset='utf-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <title>Verify Your Email</title>
+                </head>
+                <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                    <div style='background-color: #f8f9fa; padding: 30px; border-radius: 10px; border: 1px solid #e9ecef;'>
+                        <h1 style='color: #007bff; margin-bottom: 30px; text-align: center;'>Welcome to StudyGroup!</h1>
+                        
+                        <p style='font-size: 16px; margin-bottom: 20px;'>Hello <strong>{userName}</strong>,</p>
+                        
+                        <p style='font-size: 16px; margin-bottom: 20px;'>
+                            Thank you for registering with StudyGroup! To complete your registration and start creating or joining study groups, 
+                            please verify your email address by clicking the button below.
+                        </p>
+                        
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='{verificationUrl}' 
+                               style='display: inline-block; background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;'>
+                                Verify Email Address
+                            </a>
+                        </div>
+                        
+                        <p style='font-size: 14px; color: #666; margin-top: 30px;'>
+                            If the button doesn't work, you can also copy and paste this link into your browser:
+                            <br>
+                            <a href='{verificationUrl}' style='color: #007bff; word-break: break-all;'>{verificationUrl}</a>
+                        </p>
+                        
+                        <hr style='border: none; border-top: 1px solid #e9ecef; margin: 30px 0;'>
+                        
+                        <p style='font-size: 12px; color: #999; text-align: center;'>
+                            This verification link will expire in 24 hours for security reasons.
+                            <br>
+                            If you didn't create an account with StudyGroup, please ignore this email.
+                        </p>
+                    </div>
+                </body>
+                </html>";
+        }
+
+        /// <summary>
+        /// Generates plain text email body for email verification.
+        /// </summary>
+        /// <param name="userName">The user's name</param>
+        /// <param name="verificationUrl">The verification URL</param>
+        /// <returns>Plain text email content</returns>
+        private string GenerateEmailVerificationText(string userName, string verificationUrl)
+        {
+            return $@"Welcome to StudyGroup!
+
+Hello {userName},
+
+Thank you for registering with StudyGroup! To complete your registration and start creating or joining study groups, please verify your email address by visiting the following link:
+
+{verificationUrl}
+
+This verification link will expire in 24 hours for security reasons.
+
+If you didn't create an account with StudyGroup, please ignore this email.
+
+Best regards,
+The StudyGroup Team";
+        }
+    }
+}

@@ -1,0 +1,53 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.Services;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Repositories;
+using System.Data;
+using Microsoft.Data.SqlClient;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ----------------------
+// Add services to the container
+// ----------------------
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+    );
+
+// Swagger/OpenAPI
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Register Dapper's IDbConnection
+builder.Services.AddScoped<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register repository and service
+builder.Services.AddScoped<IStudyGroupRepository, StudyGroupRepository>();
+builder.Services.AddScoped<IStudyGroupService, StudyGroupService>();
+
+
+// ----------------------
+// Build app
+// ----------------------
+var app = builder.Build();
+
+// Configure HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage(); // helpful for debugging
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

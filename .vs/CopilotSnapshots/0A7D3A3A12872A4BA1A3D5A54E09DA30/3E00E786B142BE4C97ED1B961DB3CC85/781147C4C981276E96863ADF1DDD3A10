@@ -1,0 +1,336 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for GroupMember endpoints with instant membership joining.
+    /// Users can join study groups immediately without approval process.
+    /// Requires JWT authentication for all endpoints.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints
+    public class GroupMembersController : ControllerBase
+    {
+        private readonly IGroupMemberService _service;
+
+        /// <summary>
+        /// Initializes a new instance of the GroupMembersController.
+        /// </summary>
+        /// <param name="service">The group member service for handling business logic</param>
+        public GroupMembersController(IGroupMemberService service)
+        {
+            _service = service;
+        }
+
+        #region Basic CRUD Operations
+
+        /// <summary>
+        /// GET: api/groupmembers
+        /// Retrieves all group memberships in the system.
+        /// </summary>
+        /// <returns>List of all group memberships with their status information</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var members = await _service.GetAllGroupMembersAsync();
+            return Ok(members);
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/{id}
+        /// Retrieves a specific group membership by its unique ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the group membership</param>
+        /// <returns>The group membership details if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var member = await _service.GetGroupMemberByIdAsync(id);
+            if (member == null) return NotFound();
+            return Ok(member);
+        }
+
+        /// <summary>
+        /// POST: api/groupmembers
+        /// Creates a new group membership directly with specified status.
+        /// </summary>
+        /// <param name="groupMemberDto">The group membership data including GroupId, UserId, and StatusId</param>
+        /// <returns>The created membership with its new ID</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateGroupMemberDto groupMemberDto)
+        {
+            var id = await _service.CreateGroupMemberAsync(groupMemberDto);
+            return CreatedAtAction(nameof(GetById), new { id }, groupMemberDto);
+        }
+
+        /// <summary>
+        /// PUT: api/groupmembers/{id}
+        /// Updates an existing group membership.
+        /// </summary>
+        /// <param name="id">The ID of the membership to update</param>
+        /// <param name="groupMemberDto">The updated membership data</param>
+        /// <returns>NoContent if successful, NotFound if membership doesn't exist</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateGroupMemberDto groupMemberDto)
+        {
+            var success = await _service.UpdateGroupMemberAsync(id, groupMemberDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE: api/groupmembers/{id}
+        /// Removes a group membership completely from the system.
+        /// </summary>
+        /// <param name="id">The ID of the membership to delete</param>
+        /// <returns>NoContent if successful, NotFound if membership doesn't exist</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteGroupMemberAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        #endregion
+
+        #region Instant Membership Management Endpoints
+
+        /// <summary>
+        /// GET: api/groupmembers/groups/{groupId}/members
+        /// Retrieves all active members of a specific study group.
+        /// Since we removed approval workflow, this shows all members.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group</param>
+        /// <returns>List of all active members for the specified group</returns>
+        [HttpGet("groups/{groupId}/members")]
+        public async Task<IActionResult> GetGroupMembers(int groupId)
+        {
+            var members = await _service.GetActiveMembersAsync(groupId); // Only get active members
+            return Ok(new
+            {
+                Message = $"👥 Active Members of Study Group {groupId}",
+                GroupId = groupId,
+                TotalMembers = members.Count(),
+                Members = members,
+                Note = "All members are automatically approved when they join"
+            });
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/users/{userId}/groups
+        /// Retrieves all study groups that a specific user is a member of.
+        /// Since we removed approval workflow, these are all active memberships.
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <returns>List of all group memberships for the specified user</returns>
+        [HttpGet("users/{userId}/groups")]
+        public async Task<IActionResult> GetUserGroups(int userId)
+        {
+            var groups = await _service.GetUserGroupsAsync(userId);
+            // Filter to only show active memberships (StatusId = 2)
+            var activeGroups = groups.Where(g => g.StatusId == 2).ToList();
+            
+            return Ok(new
+            {
+                Message = $"📚 Study Groups for User {userId}",
+                UserId = userId,
+                TotalGroups = activeGroups.Count,
+                Groups = activeGroups,
+                Note = "All memberships are automatically active when users join"
+            });
+        }
+
+        /// <summary>
+        /// POST: api/groupmembers/groups/{groupId}/join
+        /// Allows a user to instantly join a study group.
+        /// Creates a membership with "Approved" status immediately (no waiting for approval).
+        /// </summary>
+        /// <param name="groupId">The ID of the study group to join</param>
+        /// <param name="joinDto">Contains the UserId of the user requesting to join</param>
+        /// <returns>Success message with membership ID confirming instant membership</returns>
+        [HttpPost("groups/{groupId}/join")]
+        public async Task<IActionResult> JoinGroupInstantly(int groupId, [FromBody] JoinGroupDto joinDto)
+        {
+            try
+            {
+                // Create membership with "Approved" status (StatusId = 2) immediately
+                var createMemberDto = new CreateGroupMemberDto
+                {
+                    GroupId = groupId,
+                    UserId = joinDto.UserId,
+                    StatusId = 2 // Approved status - instant membership!
+                };
+
+                var membershipId = await _service.CreateGroupMemberAsync(createMemberDto);
+                
+                return Ok(new 
+                { 
+                    MembershipId = membershipId,
+                    Message = "🎉 Welcome! You've instantly joined the study group!",
+                    Status = "Approved",
+                    GroupId = groupId,
+                    UserId = joinDto.UserId,
+                    Benefits = new []
+                    {
+                        "✅ You're now an active member",
+                        "✅ No waiting for approval needed",
+                        "✅ Start participating immediately",
+                        "✅ Access all group activities"
+                    }
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle cases where user is already a member
+                return BadRequest(new { Error = ex.Message, Note = "You might already be a member of this group" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to join group", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/groupmembers/groups/{groupId}/leave
+        /// Allows a user to leave a study group instantly.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group to leave</param>
+        /// <param name="userId">The ID of the user leaving the group</param>
+        /// <returns>Success message confirming the user left the group</returns>
+        [HttpDelete("groups/{groupId}/leave")]
+        public async Task<IActionResult> LeaveGroup(int groupId, [FromQuery] int userId)
+        {
+            try
+            {
+                // Find the user's membership in this group
+                var userMemberships = await _service.GetUserGroupsAsync(userId);
+                var membership = userMemberships.FirstOrDefault(m => m.GroupId == groupId);
+                
+                if (membership == null)
+                {
+                    return NotFound(new { Error = "You are not a member of this group" });
+                }
+
+                // Remove the membership
+                var success = await _service.DeleteGroupMemberAsync(membership.GroupMemberId);
+                if (!success)
+                {
+                    return BadRequest(new { Error = "Failed to leave group" });
+                }
+                
+                return Ok(new 
+                { 
+                    Message = "👋 You have successfully left the study group",
+                    GroupId = groupId,
+                    UserId = userId,
+                    Note = "You can rejoin anytime using the join endpoint"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = "Failed to leave group", Details = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// DELETE: api/groupmembers/{id}/remove
+        /// Removes a user from a group by deleting their membership record.
+        /// This can be used by group creators or administrators.
+        /// </summary>
+        /// <param name="id">The ID of the membership to remove</param>
+        /// <returns>Success message if removed, NotFound if membership doesn't exist</returns>
+        [HttpDelete("{id}/remove")]
+        public async Task<IActionResult> RemoveFromGroup(int id)
+        {
+            var success = await _service.DeleteGroupMemberAsync(id);
+            if (!success) return NotFound("Membership not found");
+            
+            return Ok(new 
+            { 
+                Message = "✅ Member removed from group successfully",
+                Note = "The user can rejoin the group anytime"
+            });
+        }
+
+        #endregion
+
+        #region Legacy Endpoints (Kept for Compatibility)
+
+        /// <summary>
+        /// GET: api/groupmembers/groups/{groupId}/members/active
+        /// Gets active members (same as GetGroupMembers since all members are now automatically active).
+        /// Kept for API compatibility.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group</param>
+        /// <returns>List of active members in the group</returns>
+        [HttpGet("groups/{groupId}/members/active")]
+        public async Task<IActionResult> GetActiveMembers(int groupId)
+        {
+            // Since all members are automatically approved, this is the same as GetGroupMembers
+            return await GetGroupMembers(groupId);
+        }
+
+        /// <summary>
+        /// GET: api/groupmembers/groups/{groupId}/members/pending
+        /// Gets pending members (always empty since we removed approval workflow).
+        /// Kept for API compatibility but will always return empty list.
+        /// </summary>
+        /// <param name="groupId">The ID of the study group</param>
+        /// <returns>Empty list since there are no pending members with instant approval</returns>
+        [HttpGet("groups/{groupId}/members/pending")]
+        public async Task<IActionResult> GetPendingMembers(int groupId)
+        {
+            return Ok(new
+            {
+                Message = "📝 Pending Members",
+                GroupId = groupId,
+                PendingMembers = new List<object>(), // Always empty
+                Count = 0,
+                Note = "No pending members - all users are automatically approved when they join!"
+            });
+        }
+
+        /// <summary>
+        /// PUT: api/groupmembers/{id}/approve
+        /// Approval endpoint (no longer needed since all joins are instant).
+        /// Kept for API compatibility but returns message explaining new workflow.
+        /// </summary>
+        /// <param name="id">The ID of the membership</param>
+        /// <returns>Message explaining that approval is no longer needed</returns>
+        [HttpPut("{id}/approve")]
+        public async Task<IActionResult> ApproveMembership(int id)
+        {
+            return Ok(new 
+            { 
+                Message = "✅ Approval No Longer Needed",
+                Note = "All users are automatically approved when they join groups - no manual approval required!",
+                NewWorkflow = "Users join instantly using POST /api/groupmembers/groups/{groupId}/join"
+            });
+        }
+
+        /// <summary>
+        /// PUT: api/groupmembers/{id}/reject
+        /// Rejection endpoint (no longer needed since all joins are instant).
+        /// Kept for API compatibility but returns message explaining new workflow.
+        /// </summary>
+        /// <param name="id">The ID of the membership</param>
+        /// <returns>Message explaining that rejection is no longer needed</returns>
+        [HttpPut("{id}/reject")]
+        public async Task<IActionResult> RejectMembership(int id)
+        {
+            return Ok(new 
+            { 
+                Message = "ℹ️ Rejection No Longer Available",
+                Note = "All users are automatically approved when they join groups",
+                Alternative = "Use DELETE /api/groupmembers/{id}/remove to remove unwanted members after they join"
+            });
+        }
+
+        #endregion
+    }
+}

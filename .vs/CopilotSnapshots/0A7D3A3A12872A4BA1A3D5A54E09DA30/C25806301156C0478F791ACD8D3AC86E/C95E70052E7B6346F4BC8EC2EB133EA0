@@ -1,0 +1,28 @@
+﻿{
+
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=DatabaseProject;Trusted_Connection=True;Encrypt=False;"
+  },
+
+  "Jwt": {
+    "SecretKey": "YourSuperSecretKeyThatShouldBeAtLeast32CharactersLongForSecurity!",
+    "Issuer": "StudyGroupApi",
+    "Audience": "PrincipiaStudents",
+    "ExpirationMinutes": "60"
+  },
+
+  "Application": {
+    "Name": "StudyGroup MVP - Principia College",
+    "AllowedEmailDomain": "@principia.edu",
+    "College": "Principia College"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+
+}

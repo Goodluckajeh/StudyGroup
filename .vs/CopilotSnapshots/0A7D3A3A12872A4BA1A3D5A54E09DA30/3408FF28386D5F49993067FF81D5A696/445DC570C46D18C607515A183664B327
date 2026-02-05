@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    // Implements ITagService, contains business logic for tags
+    public class TagService : ITagService
+    {
+        private readonly ITagRepository _repository;
+
+        // Injects the tag repository
+        public TagService(ITagRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // Gets all tags
+        public async Task<IEnumerable<Tag>> GetAllTagsAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        // Gets a tag by ID
+        public async Task<Tag?> GetTagByIdAsync(int tagId)
+        {
+            return await _repository.GetByIdAsync(tagId);
+        }
+
+        // Creates a new tag
+        public async Task<int> CreateTagAsync(Tag tag)
+        {
+            return await _repository.CreateAsync(tag);
+        }
+
+        // Updates an existing tag
+        public async Task<bool> UpdateTagAsync(Tag tag)
+        {
+            return await _repository.UpdateAsync(tag);
+        }
+
+        // Deletes a tag by ID
+        public async Task<bool> DeleteTagAsync(int tagId)
+        {
+            return await _repository.DeleteAsync(tagId);
+        }
+    }
+}

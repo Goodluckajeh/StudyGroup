@@ -1,0 +1,12 @@
+﻿namespace StudyGroup.Data.SqlQueries
+{
+    // Contains SQL queries for GroupMember entity CRUD operations
+    public static class GroupMemberSql
+    {
+        public const string GetAll = @"SELECT * FROM GroupMembers";
+        public const string GetById = @"SELECT * FROM GroupMembers WHERE GroupMemberId = @GroupMemberId";
+        public const string Insert = @"INSERT INTO GroupMembers (GroupId, UserId, StatusId) VALUES (@GroupId, @UserId, @StatusId); SELECT CAST(SCOPE_IDENTITY() as int);";
+        public const string Update = @"UPDATE GroupMembers SET GroupId = @GroupId, UserId = @UserId, StatusId = @StatusId WHERE GroupMemberId = @GroupMemberId";
+        public const string Delete = @"DELETE FROM GroupMembers WHERE GroupMemberId = @GroupMemberId";
+    }
+}

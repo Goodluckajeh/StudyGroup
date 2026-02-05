@@ -1,0 +1,69 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Api.Controllers
+{
+    // API controller for EntityType endpoints
+    [ApiController]
+    [Route("api/[controller]")]
+    public class EntityTypesController : ControllerBase
+    {
+        private readonly IEntityTypeService _service;
+
+        // Injects the entity type service
+        public EntityTypesController(IEntityTypeService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/entitytypes
+        // Returns all entity types
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var types = await _service.GetAllEntityTypesAsync();
+            return Ok(types);
+        }
+
+        // GET: api/entitytypes/{id}
+        // Returns an entity type by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var type = await _service.GetEntityTypeByIdAsync(id);
+            if (type == null) return NotFound();
+            return Ok(type);
+        }
+
+        // POST: api/entitytypes
+        // Creates a new entity type
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] EntityType entityType)
+        {
+            var id = await _service.CreateEntityTypeAsync(entityType);
+            return CreatedAtAction(nameof(GetById), new { id }, entityType);
+        }
+
+        // PUT: api/entitytypes/{id}
+        // Updates an existing entity type
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] EntityType entityType)
+        {
+            entityType.EntityTypeId = id;
+            var success = await _service.UpdateEntityTypeAsync(entityType);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        // DELETE: api/entitytypes/{id}
+        // Deletes an entity type by ID
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteEntityTypeAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}

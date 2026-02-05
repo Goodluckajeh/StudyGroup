@@ -1,0 +1,43 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Service.Interfaces;
+
+namespace StudyGroup.Service.Services
+{
+    public class StudyGroupService : IStudyGroupService
+    {
+        private readonly IStudyGroupRepository _repository;
+
+        public StudyGroupService(IStudyGroupRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<IEnumerable<StudyGroup.Data.Models.StudyGroup>> GetAllGroupsAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<StudyGroup.Data.Models.StudyGroup?> GetGroupByIdAsync(int groupId)
+        {
+            return await _repository.GetByIdAsync(groupId);
+        }
+
+        public async Task<int> CreateGroupAsync(StudyGroup.Data.Models.StudyGroup group)
+        {
+            return await _repository.CreateAsync(group);
+        }
+
+        public async Task<bool> UpdateGroupAsync(StudyGroup.Data.Models.StudyGroup group)
+        {
+            return await _repository.UpdateAsync(group);
+        }
+
+        public async Task<bool> DeleteGroupAsync(int groupId)
+        {
+            return await _repository.DeleteAsync(groupId);
+        }
+    }
+}

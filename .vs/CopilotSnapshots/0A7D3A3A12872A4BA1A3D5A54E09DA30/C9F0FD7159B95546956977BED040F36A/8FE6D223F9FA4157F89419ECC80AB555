@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Service.Interfaces
+{
+    // Interface for Tag service, defines business logic methods
+    public interface ITagService
+    {
+        Task<IEnumerable<Tag>> GetAllTagsAsync();
+        Task<Tag?> GetTagByIdAsync(int tagId);
+        Task<int> CreateTagAsync(Tag tag);
+        Task<bool> UpdateTagAsync(Tag tag);
+        Task<bool> DeleteTagAsync(int tagId);
+    }
+}

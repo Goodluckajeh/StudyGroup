@@ -1,0 +1,197 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.Services;
+using StudyGroup.Data.Interfaces;
+using StudyGroup.Data.Repositories;
+using StudyGroup.Api.Services.Interfaces;
+using StudyGroup.Api.Services.Implementations;
+using StudyGroup.Api.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+    );
+
+// Configure JWT Settings
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// Configure Swagger/OpenAPI with JWT Authentication
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    { 
+        Title = "StudyGroup API - Principia College", 
+        Version = "v1",
+        Description = "StudyGroup MVP API for Principia College community. Use /api/auth/login to get JWT token for authentication."
+    });
+
+    // Add JWT Authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token.\n\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+});
+
+// Register Dapper's IDbConnection
+builder.Services.AddScoped<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Authentication Service
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Key))
+{
+    throw new InvalidOperationException("JWT settings not configured properly");
+}
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidateAudience = true,
+        ValidAudience = jwtSettings.Audience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        RequireExpirationTime = true
+    };
+
+    // Handle JWT events
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("JWT Token validated successfully");
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            var result = System.Text.Json.JsonSerializer.Serialize(new 
+            {
+                error = "Unauthorized",
+                message = "Please login using POST /api/auth/login to get a JWT token.",
+                statusCode = 401
+            });
+            return context.Response.WriteAsync(result);
+        }
+    };
+});
+
+// Configure Authorization with default policy requiring authentication
+builder.Services.AddAuthorization(options =>
+{
+    // Require authentication by default for all endpoints except those marked with [AllowAnonymous]
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
+// Register repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IStudyGroupRepository, StudyGroupRepository>();
+builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<IMembershipStatusRepository, MembershipStatusRepository>();
+builder.Services.AddScoped<IEntityTypeRepository, EntityTypeRepository>();
+builder.Services.AddScoped<IDayOfWeekRepository, DayOfWeekRepository>();
+
+// Register services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+
+// StudyGroupService with CourseRepository dependency
+builder.Services.AddScoped<IStudyGroupService>(provider => 
+    new StudyGroupService(
+        provider.GetRequiredService<IStudyGroupRepository>(),
+        provider.GetRequiredService<ICourseRepository>()
+    ));
+
+builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
+builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IMembershipStatusService, MembershipStatusService>();
+builder.Services.AddScoped<IEntityTypeService, EntityTypeService>();
+builder.Services.AddScoped<IDayOfWeekService, DayOfWeekService>();
+
+// ----------------------
+// Build app
+// ----------------------
+var app = builder.Build();
+
+// Configure HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "StudyGroup API v1");
+        c.DocumentTitle = "StudyGroup API - Principia College";
+        c.DefaultModelsExpandDepth(-1);
+        c.DisplayRequestDuration();
+    });
+}
+
+app.UseHttpsRedirection();
+
+// Add Authentication and Authorization middleware (ORDER MATTERS!)
+app.UseAuthentication(); // Must come before UseAuthorization
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

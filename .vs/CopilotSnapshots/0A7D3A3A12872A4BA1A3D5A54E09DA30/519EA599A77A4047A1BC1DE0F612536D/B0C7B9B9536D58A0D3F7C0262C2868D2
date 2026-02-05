@@ -1,0 +1,16 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using StudyGroup.Data.Models;
+
+namespace StudyGroup.Service.Interfaces
+{
+    // Interface for GroupMember service, defines business logic methods
+    public interface IGroupMemberService
+    {
+        Task<IEnumerable<GroupMember>> GetAllGroupMembersAsync();
+        Task<GroupMember?> GetGroupMemberByIdAsync(int groupMemberId);
+        Task<int> CreateGroupMemberAsync(GroupMember groupMember);
+        Task<bool> UpdateGroupMemberAsync(GroupMember groupMember);
+        Task<bool> DeleteGroupMemberAsync(int groupMemberId);
+    }
+}

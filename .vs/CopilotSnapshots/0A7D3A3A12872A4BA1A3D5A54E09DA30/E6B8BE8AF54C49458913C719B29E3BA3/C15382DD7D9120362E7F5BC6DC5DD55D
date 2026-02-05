@@ -1,0 +1,84 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using StudyGroup.Service.Interfaces;
+using System.Security.Claims;
+
+namespace StudyGroup.Api.Authorization
+{
+    /// <summary>
+    /// Authorization filter that ensures only the creator of a study group can perform certain operations.
+    /// Automatically validates that the current user (from JWT token) is the creator of the specified study group.
+    /// </summary>
+    public class StudyGroupCreatorOnlyAttribute : ActionFilterAttribute
+    {
+        private readonly string _groupIdParameterName;
+
+        /// <summary>
+        /// Initializes the authorization filter.
+        /// </summary>
+        /// <param name="groupIdParameterName">The name of the route/query parameter containing the group ID (default: "id")</param>
+        public StudyGroupCreatorOnlyAttribute(string groupIdParameterName = "id")
+        {
+            _groupIdParameterName = groupIdParameterName;
+        }
+
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            // Get the current user ID from JWT claims
+            var userIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out int currentUserId))
+            {
+                context.Result = new UnauthorizedObjectResult(new { Error = "Invalid or missing user token" });
+                return;
+            }
+
+            // Get the group ID from the route parameters
+            if (!context.ActionArguments.TryGetValue(_groupIdParameterName, out var groupIdObj) || 
+                !int.TryParse(groupIdObj?.ToString(), out int groupId))
+            {
+                context.Result = new BadRequestObjectResult(new { Error = $"Invalid or missing {_groupIdParameterName} parameter" });
+                return;
+            }
+
+            // Get the study group service from DI container
+            var studyGroupService = context.HttpContext.RequestServices.GetRequiredService<IStudyGroupService>();
+            
+            try
+            {
+                // Check if the study group exists and get its details
+                var studyGroup = await studyGroupService.GetGroupByIdAsync(groupId);
+                if (studyGroup == null)
+                {
+                    context.Result = new NotFoundObjectResult(new { Error = "Study group not found" });
+                    return;
+                }
+
+                // Check if the current user is the creator of this study group
+                if (studyGroup.CreatorId != currentUserId)
+                {
+                    context.Result = new ObjectResult(new 
+                    { 
+                        Error = "Access denied - Only the group creator can perform this action",
+                        GroupId = groupId,
+                        CreatorId = studyGroup.CreatorId,
+                        YourUserId = currentUserId,
+                        Note = "You can only manage study groups that you created"
+                    })
+                    {
+                        StatusCode = 403
+                    };
+                    return;
+                }
+
+                // User is authorized - continue with the action
+                await next();
+            }
+            catch (Exception ex)
+            {
+                context.Result = new StatusCodeResult(500);
+                // Log the exception if you have a logger
+                return;
+            }
+        }
+    }
+}

@@ -1,0 +1,96 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using StudyGroup.Service.Interfaces;
+using StudyGroup.Service.DTOs;
+
+namespace StudyGroup.Api.Controllers
+{
+    /// <summary>
+    /// API controller for Course endpoints.
+    /// Requires JWT authentication for all endpoints.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Require JWT authentication for all endpoints
+    public class CoursesController : ControllerBase
+    {
+        private readonly ICourseService _service;
+
+        /// <summary>
+        /// Initializes a new instance of the CoursesController.
+        /// </summary>
+        /// <param name="service">The course service for handling business logic</param>
+        public CoursesController(ICourseService service)
+        {
+            _service = service;
+        }
+
+        /// <summary>
+        /// GET: api/courses
+        /// Returns all courses from the system.
+        /// </summary>
+        /// <returns>List of all courses</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var courses = await _service.GetAllCoursesAsync();
+            return Ok(courses);
+        }
+
+        /// <summary>
+        /// GET: api/courses/{id}
+        /// Returns a course by ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the course</param>
+        /// <returns>The course if found, otherwise NotFound</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var course = await _service.GetCourseByIdAsync(id);
+            if (course == null) return NotFound();
+            return Ok(course);
+        }
+
+        /// <summary>
+        /// POST: api/courses
+        /// Creates a new course.
+        /// </summary>
+        /// <param name="courseDto">The course data to create</param>
+        /// <returns>The created course with its new ID</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateCourseDto courseDto)
+        {
+            var id = await _service.CreateCourseAsync(courseDto);
+            return CreatedAtAction(nameof(GetById), new { id }, courseDto);
+        }
+
+        /// <summary>
+        /// PUT: api/courses/{id}
+        /// Updates an existing course.
+        /// </summary>
+        /// <param name="id">The ID of the course to update</param>
+        /// <param name="courseDto">The updated course data</param>
+        /// <returns>NoContent if successful, NotFound if course doesn't exist</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCourseDto courseDto)
+        {
+            var success = await _service.UpdateCourseAsync(id, courseDto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        /// <summary>
+        /// DELETE: api/courses/{id}
+        /// Removes a course by ID.
+        /// </summary>
+        /// <param name="id">The ID of the course to delete</param>
+        /// <returns>NoContent if successful, NotFound if course doesn't exist</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteCourseAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}
